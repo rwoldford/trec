@@ -1,11 +1,20 @@
-#' get the branch component family from the result of (single/avearge/complete) linkage clustering.
-#' @param merge is the component from the result of "hclust", it is an n-1 by 2 matrix.
-#' @return a matrix which represent data id and cluster assignment
+#' Get the branch component family from the result of (single/average/complete) linkage clustering.
+#' @param merge The n-1 by 2 matrix that is the merge component output from
+#' a hierarchical clustering which describes how the n points are merged in the cluster
+#' hierarchy.
+#' @return An n by nlevels matrix where each row corresponds to a data point and each
+#' column identifies a cluster number for that data point in the hierarchy.
 #' @examples
-#' data<-matrix(rnorm(100),nrow=50)
-#' cl<-hclust(dist(data),method='single')
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#'               
+#' cl <- stats::hclust(dist(data),method='single')
 #' getComponentsfromMerge(cl$merge)
+#' 
 #' @export
+#' 
 getComponentsfromMerge <- function( merge ) {
     
     # m is number of points
@@ -87,14 +96,18 @@ getComponentsfromMerge <- function( merge ) {
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
-#' @param clustering: a matrix which stands for multiple clustering outcomes each row represent a data point, each column is an assignment of cluster id
+#' @param clustering a matrix which stands for multiple clustering outcomes each row represent a data point, each column is an assignment of cluster id
 #' @return final one hierarchical clustering
 #' @examples
-#' data<-matrix(rnorm(100),nrow=50)
-#' cl1<-asBranchComponent(hclust(dist(data),method='single'))
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' cl1<-asBranchComponent(stats::hclust(dist(data),method='single'))
 #' cl2<-asBranchComponent(kmeans(data,centers=3))
 #' TRECgetComponentsfromClustering(cbind(cl1,cl2))
 #' @export
+#' 
 TRECgetComponentsfromClustering <- function( clustering ) {
     # n is number of data points
     n <- dim(clustering)[1]
@@ -104,13 +117,15 @@ TRECgetComponentsfromClustering <- function( clustering ) {
     {
         for(k in 1:j)
         {
-            clusteringsum[j,k] <- sum((clustering[j,]!=0)&(clustering[k,]!=0)&(clustering[j,]==clustering[k,]))
+            clusteringsum[j,k] <- sum((clustering[j,]!=0)&
+                                          (clustering[k,]!=0)&
+                                          (clustering[j,]==clustering[k,]))
         }
     }
     
     # use single linkage method to produce result for trec
-    distance <- as.dist(clusteringsum)
-    singlelinkage <- hclust(-distance, method = "single")
+    distance <- stats::as.dist(clusteringsum)
+    singlelinkage <- stats::hclust(-distance, method = "single")
     merge <- singlelinkage$merge
     height <- singlelinkage$height
     
@@ -119,12 +134,14 @@ TRECgetComponentsfromClustering <- function( clustering ) {
     {
         for(k in 1:(j-1))
         {
-            clusteringsum[j,k] <- sum((clustering[j,]!=0)&(clustering[k,]!=0)&(clustering[j,]==clustering[k,]))
+            clusteringsum[j,k] <- sum((clustering[j,]!=0)&
+                                          (clustering[k,]!=0)&
+                                          (clustering[j,]==clustering[k,]))
         }
     }
     
-    distance <- as.dist(clusteringsum)
-    singlelinkage <- hclust(-distance, method = "single")
+    distance <- stats::as.dist(clusteringsum)
+    singlelinkage <- stats::hclust(-distance, method = "single")
     merge <- singlelinkage$merge
     height <- singlelinkage$height
     
@@ -220,23 +237,30 @@ TRECgetComponentsfromClustering <- function( clustering ) {
 
 
 #' Calculate distance of two hierarchical clustering matrix
-#' @param two hierarchical clustering matrix
+#' @param branchComponent1 The first clustering as a branch component
+#' @param branchComponent2 The second clustering as a branch component
 #' @return distance between 0 and square root of 2
 #' @examples
-#' data<-matrix(rnorm(100),nrow=50)
-#' clu1<-asBranchComponent(hclust(dist(data),method='complete'))
-#' clu2<-asBranchComponent(hclust(dist(data),method='single'))
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' clu1<-asBranchComponent(stats::hclust(dist(data),method='complete'))
+#' clu2<-asBranchComponent(stats::hclust(dist(data),method='single'))
 #' getClusteringDistance(clu1,clu2)
 #' @export
-getClusteringDistance <- function(clustering1, clustering2)
+#' 
+getClusteringDistance <- function(branchComponent1, branchComponent2)
 {
-    n <- nrow(clustering1)
+    n <- nrow(branchComponent1)
     w1 <- vector(mode = 'integer', length = n*(n-1)/2)
     for(j in 2:n)
     {
         for(k in 1:(j-1))
         {
-            w1[(j-1)*(j-2)/2+k] <- sum((clustering1[j,]!=0)&(clustering1[k,]!=0)&(clustering1[j,]==clustering1[k,]))
+            w1[(j-1)*(j-2)/2+k] <- sum((branchComponent1[j,]!=0)&
+                                           (branchComponent1[k,]!=0)&
+                                           (branchComponent1[j,]==branchComponent1[k,]))
         }
     }
     w2 <- vector(mode = 'integer', length = n*(n-1)/2)
@@ -244,7 +268,9 @@ getClusteringDistance <- function(clustering1, clustering2)
     {
         for(k in 1:(j-1))
         {
-            w2[(j-1)*(j-2)/2+k] <- sum((clustering2[j,]!=0)&(clustering2[k,]!=0)&(clustering2[j,]==clustering2[k,]))
+            w2[(j-1)*(j-2)/2+k] <- sum((branchComponent2[j,]!=0)&
+                                           (branchComponent2[k,]!=0)&
+                                           (branchComponent2[j,]==branchComponent2[k,]))
         }
     }
     #w1<- w1 - 1
@@ -1064,8 +1090,8 @@ getClusteringDistance <- function(clustering1, clustering2)
 # 			}
 # 		}
 # 	}
-# 	clustering2 <- getNestedClustering(components_com)
-# 	components <- getFamilyofBranchComponent(clustering2)
+# 	branchComponent2 <- getNestedClustering(components_com)
+# 	components <- getFamilyofBranchComponent(branchComponent2)
 # 	Tree <- generateTreebyBranchComponents(components)
 #
 # 	Tree

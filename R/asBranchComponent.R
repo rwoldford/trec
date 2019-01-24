@@ -1,117 +1,119 @@
 #' Transform all data structures into BranchComponent
 #'
-#' @param input data structure
-#' @return a matrix
+#' @param x data structure output by some clustering method 
+#' (e.g. hclust, kmeans, dbscan, etc.)
+#' @return a matrix providing the mapping 
+#' between data points and cluster id.
 #' @examples
-#' x<-kmeans(matrix(rnorm(100),nrows=50),centers=3)
+#' x <- kmeans(matrix(rnorm(100),nrow=50),centers=3)
 #' asBranchComponent(x)
 #' @export
-asBranchComponent<- function(x)
+asBranchComponent <- function(x)
 {
-  UseMethod("asBranchComponent")
+    UseMethod("asBranchComponent")
 }
 
 asBranchComponent.default<-function(x)
 {
-  as.matrix(x)
+    as.matrix(x)
 }
 
 ## adjclust package
-asBranchComponent.chac<-function(x)
+asBranchComponent.chac <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 
 ## adpclust package
-asBranchComponent.adpclust<-function(x)
+asBranchComponent.adpclust <- function(x)
 {
-  x$clusters
+    x$clusters
 }
 
 ## afCEC package
-asBranchComponent.afCEC<-function(x)
+asBranchComponent.afCEC <- function(x)
 {
-  x$labels
+    x$labels
 }
 
 ## apcluster package
-asBranchComponent.apcluster<-function(x)
+asBranchComponent.apcluster <- function(x)
 {
-  x
+    x
 }
-asBranchComponent.AggExResul<-function(x)
+asBranchComponent.AggExResul <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 
 ## bclust package
-asBranchComponent.bclust<-function(x)
+asBranchComponent.bclust <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 
-asBranchComponent.bclustvs<-function(x)
+asBranchComponent.bclustvs <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 ## bclust package
 
 ## biclust package
 
 ## package cba
-asBranchComponent.ccfkms<-function(x)
+asBranchComponent.ccfkms <- function(x)
 {
-  x$cl
+    x$cl
 }
 
 ## package cclust
-asBranchComponent.cclust<-function(x)
+asBranchComponent.cclust <- function(x)
 {
-  x$cluster
+    x$cluster
 }
 
 ##  package CEC
-asBranchComponent.cec<-function(x)
+asBranchComponent.cec <- function(x)
 {
-  x$cluster
+    x$cluster
 }
 
 ####  package Ckmeans.1d.dp  ####???????????????????????????????????????????????????????????
-asBranchComponent.Ckmeans.1d.dp<-function(x)
+asBranchComponent.Ckmeans.1d.dp <- function(x)
 {
-  x$cluster
+    x$cluster
 }
 
 ##  package clues
-asBranchComponent.clues<-function(x)
+asBranchComponent.clues <- function(x)
 {
-  x$mem
+    x$mem
 }
 
 ## package cluster
-asBranchComponent.agnes<-function(x)
+asBranchComponent.agnes <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 
-asBranchComponent.clara<-function(x)
+asBranchComponent.clara <- function(x)
 {
-  x$clustering
+    x$clustering
 }
 
-asBranchComponent.diana<-function(x)
+asBranchComponent.diana <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 
-asBranchComponent.fanny<-function(x)
+asBranchComponent.fanny <- function(x)
 {
-  x$clustering
+    x$clustering
 }
 
-asBranchComponent.pam<-function(x)
+asBranchComponent.pam <- function(x)
 {
-  x$clustering
+    x$clustering
 }
 
 ## ClusterR package
@@ -119,13 +121,13 @@ asBranchComponent.pam<-function(x)
 ## clustMD package
 
 ## CoClust package
-asBranchComponent.CoClust<-function(x)
+asBranchComponent.CoClust <- function(x)
 {
-  # don't know how to do this!!!!
+    # don't know how to do this!!!!
 }
 
 ##  compHclust package
-#asBranchComponent.compHclust<-function(x)
+#asBranchComponent.compHclust <- function(x)
 #{
 #}
 
@@ -133,9 +135,9 @@ asBranchComponent.CoClust<-function(x)
 ## only need default processing
 
 ## contaminatedmixt package
-#asBranchComponent.CNmixt<-function(x)
+#asBranchComponent.CNmixt <- function(x)
 #{
-  #don't know how to do this!!!
+#don't know how to do this!!!
 #}
 
 ## CORM package  ###
@@ -145,46 +147,46 @@ asBranchComponent.CoClust<-function(x)
 ## package CrossClustering returns list??????????????????????
 
 ## Package 'CRPClustering' only requires default processing ##
-asBranchComponent.dbscan_fast<-function(x)
+asBranchComponent.dbscan_fast <- function(x)
 {
-  tmp <- x$cluster
-  cl<-max(tmp)+1
-  for (ii in 1:length(tmp)) {
-    if(tmp[ii]==0){
-      tmp[ii]<-cl
-      cl<-cl+1
+    tmp <- x$cluster
+    cl<-max(tmp)+1
+    for (ii in 1:length(tmp)) {
+        if(tmp[ii]==0){
+            tmp[ii]<-cl
+            cl <- cl+1
+        }
     }
-  }
-  tmp
+    tmp
 }
 
 ## Fclust package  ##
-asBranchComponent.fclust<-function(x)
+asBranchComponent.fclust <- function(x)
 {
-  x$clus
+    x$clus
 }
 
 ##  hierarchical based clustering
-asBranchComponent.hclust<-function(x)
+asBranchComponent.hclust <- function(x)
 {
-  getComponentsfromMerge(x$merge)
+    getComponentsfromMerge(x$merge)
 }
 
 ## package kernlab
-asBranchComponent.specc<-function(x)
+asBranchComponent.specc <- function(x)
 {
-  x@.Data
+    x@.Data
 }
 
 ## kmeans package
-asBranchComponent.kmeans<-function(x)
+asBranchComponent.kmeans <- function(x)
 {
-  x$cluster
+    x$cluster
 }
 
 ##  mixture based clustering
-asBranchComponent.Mclust<-function(x)
+asBranchComponent.Mclust <- function(x)
 {
-  x$classification
+    x$classification
 }
 

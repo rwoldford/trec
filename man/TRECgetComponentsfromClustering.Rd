@@ -7,7 +7,7 @@
 TRECgetComponentsfromClustering(clustering)
 }
 \arguments{
-\item{clustering:}{a matrix which stands for multiple clustering outcomes each row represent a data point, each column is an assignment of cluster id}
+\item{clustering}{a matrix which stands for multiple clustering outcomes each row represent a data point, each column is an assignment of cluster id}
 }
 \value{
 final one hierarchical clustering
@@ -16,8 +16,11 @@ final one hierarchical clustering
 This is a new ensemble method for combining multiple clustering outcomes
 }
 \examples{
-data<-matrix(rnorm(100),nrow=50)
-cl1<-asBranchComponent(hclust(dist(data),method='single'))
+data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+              matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+              matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+              )
+cl1<-asBranchComponent(stats::hclust(dist(data),method='single'))
 cl2<-asBranchComponent(kmeans(data,centers=3))
 TRECgetComponentsfromClustering(cbind(cl1,cl2))
 }

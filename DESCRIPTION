@@ -19,7 +19,7 @@ Description: We develop a new ensemble method for combining multiple clustering 
     The method is agnostic about the source of the clusterings and is not tied to any
     clustering method such as k-means. The ensemble method, TREC, or tree reduced ensemble
     clustering produces a single cluster tree as its output.     
-License:  GPL-2
+License: GPL-2
 Depends:
     R (>= 3.4.0)
 Encoding: UTF-8

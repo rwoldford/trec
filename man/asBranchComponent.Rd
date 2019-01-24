@@ -7,15 +7,17 @@
 asBranchComponent(x)
 }
 \arguments{
-\item{input}{data structure}
+\item{x}{data structure output by some clustering method 
+(e.g. hclust, kmeans, dbscan, etc.)}
 }
 \value{
-a matrix
+a matrix providing the mapping 
+between data points and cluster id.
 }
 \description{
 Transform all data structures into BranchComponent
 }
 \examples{
-x<-kmeans(matrix(rnorm(100),nrows=50),centers=3)
+x <- kmeans(matrix(rnorm(100),nrow=50),centers=3)
 asBranchComponent(x)
 }

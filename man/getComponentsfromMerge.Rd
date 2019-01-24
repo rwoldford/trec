@@ -2,21 +2,29 @@
 % Please edit documentation in R/functions.R
 \name{getComponentsfromMerge}
 \alias{getComponentsfromMerge}
-\title{get the branch component family from the result of (single/avearge/complete) linkage clustering.}
+\title{Get the branch component family from the result of (single/average/complete) linkage clustering.}
 \usage{
 getComponentsfromMerge(merge)
 }
 \arguments{
-\item{merge}{is the component from the result of "hclust", it is an n-1 by 2 matrix.}
+\item{merge}{The n-1 by 2 matrix that is the merge component output from
+a hierarchical clustering which describes how the n points are merged in the cluster
+hierarchy.}
 }
 \value{
-a matrix which represent data id and cluster assignment
+An n by nlevels matrix where each row corresponds to a data point and each
+column identifies a cluster number for that data point in the hierarchy.
 }
 \description{
-get the branch component family from the result of (single/avearge/complete) linkage clustering.
+Get the branch component family from the result of (single/average/complete) linkage clustering.
 }
 \examples{
-data<-matrix(rnorm(100),nrow=50)
-cl<-hclust(dist(data),method='single')
+data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+              matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+              matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+              )
+              
+cl <- stats::hclust(dist(data),method='single')
 getComponentsfromMerge(cl$merge)
+
 }

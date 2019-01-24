@@ -2,22 +2,27 @@
 % Please edit documentation in R/functions.R
 \name{getClusteringDistance}
 \alias{getClusteringDistance}
-\title{calculate distance of two hierarchical clustering matrix}
+\title{Calculate distance of two hierarchical clustering matrix}
 \usage{
-getClusteringDistance(clustering1, clustering2)
+getClusteringDistance(branchComponent1, branchComponent2)
 }
 \arguments{
-\item{two}{hierarchical clustering matrix}
+\item{branchComponent1}{The first clustering as a branch component}
+
+\item{branchComponent2}{The second clustering as a branch component}
 }
 \value{
 distance between 0 and square root of 2
 }
 \description{
-calculate distance of two hierarchical clustering matrix
+Calculate distance of two hierarchical clustering matrix
 }
 \examples{
-data<-matrix(rnorm(100),nrow=50)
-clu1<-asBranchComponent(hclust(dist(data),method='complete'))
-clu2<-asBranchComponent(hclust(dist(data),method='single'))
+data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+              matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+              matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+              )
+clu1<-asBranchComponent(stats::hclust(dist(data),method='complete'))
+clu2<-asBranchComponent(stats::hclust(dist(data),method='single'))
 getClusteringDistance(clu1,clu2)
 }
