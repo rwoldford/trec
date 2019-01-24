@@ -1,0 +1,29 @@
+Package: TREC
+Type: Package
+Title: Tree Reduced Ensemble Clustering
+Version: 0.1.0
+Date: 2018-12-01
+Authors@R: c(person(given = "Wenqing", family = "Liu", 
+                    email = "w285liu@uwaterloo.ca", 
+                    role = c("aut", "cre")),
+             person(given = "Wu", family = "Zhou",
+                    email = "wuzhou@blackberry.com", 
+                    role = "aut"),
+             person(given = "R. Wayne", family = "Oldford",
+                    email = "rwoldford@uwaterloo.ca", 
+                    role = "aut")
+             )
+Author: Wenqing Liu [aut, cre], Wu Zhou [aut], R. Wayne Oldford [aut]
+Maintainer: R. Wayne Oldford <rwoldford@uwaterloo.ca>
+Description: We develop a new ensemble method for combining multiple clustering outcomes.
+    The method is agnostic about the source of the clusterings and is not tied to any
+    clustering method such as k-means. The ensemble method, TREC, or tree reduced ensemble
+    clustering produces a single cluster tree as its output.     
+License:  GPL-2
+Depends:
+    R (>= 3.4.0)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Suggests: testthat, knitr, rmarkdown
+VignetteBuilder: knitr
