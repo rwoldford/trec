@@ -23,7 +23,7 @@ asBranchComponent.default<-function(x)
 #' @export
 asBranchComponent.chac <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 ## adpclust package
@@ -49,20 +49,20 @@ asBranchComponent.apcluster <- function(x)
 #' @export
 asBranchComponent.AggExResul <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 ## bclust package
 #' @export
 asBranchComponent.bclust <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 #' @export
 asBranchComponent.bclustvs <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 ## biclust package  #Nothing needed here
@@ -106,7 +106,7 @@ asBranchComponent.clues <- function(x)
 #' @export
 asBranchComponent.agnes <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 #' @export
@@ -118,7 +118,7 @@ asBranchComponent.clara <- function(x)
 #' @export
 asBranchComponent.diana <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 #' @export
@@ -192,7 +192,7 @@ asBranchComponent.fclust <- function(x)
 #' @export
 asBranchComponent.hclust <- function(x)
 {
-    getComponentsfromMerge(x$merge)
+    getComponentsFromMerge(x$merge)
 }
 
 ## package kernlab
