@@ -10,8 +10,8 @@
 #'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
 #'               )
 #'               
-#' cl <- stats::hclust(dist(data),method='single')
-#' getComponentsFromMerge(cl$merge)
+#' clust <- stats::hclust(dist(data),method='single')
+#' getComponentsFromMerge(clust$merge)
 #' 
 #' @export
 getComponentsFromMerge <- function( merge ) {
@@ -102,9 +102,9 @@ getComponentsFromMerge <- function( merge ) {
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
 #'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
 #'               )
-#' cl1<-asBranchComponent(stats::hclust(dist(data),method='single'))
-#' cl2<-asBranchComponent(kmeans(data,centers=3))
-#' TRECgetComponentsfromClustering(cbind(cl1,cl2))
+#' clust1 <- asBranchComponent(stats::hclust(dist(data),method='single'))
+#' clust2 <- asBranchComponent(kmeans(data,centers=3))
+#' TRECgetComponentsfromClustering(cbind(clust1,clust2))
 #' @export
 #' 
 TRECgetComponentsfromClustering <- function( clustering ) {
@@ -244,9 +244,9 @@ TRECgetComponentsfromClustering <- function( clustering ) {
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
 #'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
 #'               )
-#' clu1<-asBranchComponent(stats::hclust(dist(data),method='complete'))
-#' clu2<-asBranchComponent(stats::hclust(dist(data),method='single'))
-#' getClusteringDistance(clu1,clu2)
+#' clust1 <- asBranchComponent(stats::hclust(dist(data),method='complete'))
+#' clust2 <- asBranchComponent(stats::hclust(dist(data),method='single'))
+#' getClusteringDistance(clust1,clust2)
 #' @export
 #' 
 getClusteringDistance <- function(branchComponent1, branchComponent2)
