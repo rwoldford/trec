@@ -11,11 +11,10 @@
 #'               )
 #'               
 #' cl <- stats::hclust(dist(data),method='single')
-#' getComponentsfromMerge(cl$merge)
+#' getComponentsFromMerge(cl$merge)
 #' 
 #' @export
-#' 
-getComponentsfromMerge <- function( merge ) {
+getComponentsFromMerge <- function( merge ) {
     
     # m is number of points
     m <- dim(merge)[1]
