@@ -5,6 +5,7 @@
 #' @examples
 #' x<-kmeans(matrix(rnorm(100),nrows=50),centers=3)
 #' asBranchComponent(x)
+#' @export
 asBranchComponent<- function(x)
 {
   UseMethod("asBranchComponent")
