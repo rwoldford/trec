@@ -16,7 +16,7 @@ asBranchComponent <- function(x)
 #' @export
 asBranchComponent.default<-function(x)
 {
-    as.matrix(x)
+    x
 }
 
 ## adjclust package
@@ -30,21 +30,21 @@ asBranchComponent.chac <- function(x)
 #' @export
 asBranchComponent.adpclust <- function(x)
 {
-    as.matrix(x$clusters)
+    x$clusters
 }
 
 ## afCEC package
 #' @export
 asBranchComponent.afCEC <- function(x)
 {
-    as.matrix(x$labels)
+    x$labels
 }
 
 ## apcluster package
 #' @export
 asBranchComponent.apcluster <- function(x)
 {
-    as.matrix(x)
+    x
 }
 #' @export
 asBranchComponent.AggExResul <- function(x)
@@ -71,35 +71,35 @@ asBranchComponent.bclustvs <- function(x)
 #' @export
 asBranchComponent.ccfkms <- function(x)
 {
-    as.matrix(x$cl)
+    x$cl
 }
 
 ## package cclust
 #' @export
 asBranchComponent.cclust <- function(x)
 {
-    as.matrix(x$cluster)
+    x$cluster
 }
 
 ##  package CEC
 #' @export
 asBranchComponent.cec <- function(x)
 {
-    as.matrix(x$cluster)
+    x$cluster
 }
 
 ####  package Ckmeans.1d.dp  #### TO DO
 #' @export
 asBranchComponent.Ckmeans.1d.dp <- function(x)
 {
-    as.matrix(x$cluster)
+    x$cluster
 }
 
 ##  package clues
 #' @export
 asBranchComponent.clues <- function(x)
 {
-    as.matrix(x$mem)
+    x$mem
 }
 
 ## package cluster
@@ -112,7 +112,7 @@ asBranchComponent.agnes <- function(x)
 #' @export
 asBranchComponent.clara <- function(x)
 {
-    as.matrix(x$clustering)
+    x$clustering
 }
 
 #' @export
@@ -124,13 +124,13 @@ asBranchComponent.diana <- function(x)
 #' @export
 asBranchComponent.fanny <- function(x)
 {
-    as.matrix(x$clustering)
+    x$clustering
 }
 
 #' @export
 asBranchComponent.pam <- function(x)
 {
-    as.matrix(x$clustering)
+    x$clustering
 }
 
 ## ClusterR package  TODO
@@ -178,14 +178,14 @@ asBranchComponent.dbscan_fast <- function(x)
             cl <- cl+1
         }
     }
-    as.matrix(tmp)
+    tmp
 }
 
 ## Fclust package  ##
 #' @export
 asBranchComponent.fclust <- function(x)
 {
-    as.matrix(x$clus)
+    x$clus
 }
 
 ##  hierarchical based clustering
@@ -199,20 +199,20 @@ asBranchComponent.hclust <- function(x)
 #' @export
 asBranchComponent.specc <- function(x)
 {
-    as.matrix(x@.Data)
+    x@.Data
 }
 
 ## kmeans package
 #' @export
 asBranchComponent.kmeans <- function(x)
 {
-    as.matrix(x$cluster)
+    x$cluster
 }
 
 ##  mixture based clustering
 #' @export
 asBranchComponent.Mclust <- function(x)
 {
-    as.matrix(x$classification)
+    x$classification
 }
 

@@ -1,7 +1,7 @@
 #context("correctness of TREC")
 library(TREC)
 
-test_that("TREC result is exactly the way we construct this algorithm", {
+test_that("TRECgetComponentsfromClustering result is exactly the way we construct this algorithm", {
 data<-read.table(file = "data_mix_gaussian.txt")
 m<-100
 n<-3*m
@@ -101,5 +101,71 @@ expected <- matrix(data = c(2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
                             2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),nrow = 300,ncol = 2)
 expect_equal(branchComponent,expected)
+})
+
+
+
+test_that("getClusteringDistance can work, and work correctly", {
+data<-read.table(file = "data_mix_gaussian.txt")
+m<-100
+n<-3*m
+####### Generating clusters via K means with 2 random starts #######
+#
+#
+# 1) k =3
+#
+#
+######
+  
+#random starts
+nRestarts <- 2
+nMethods <- nRestarts
+k <- 3
+seeds <- c(220478, 990173)
+#
+#  Get the clusterings from k-means
+clustering <- array(0, dim=c(n,nMethods))
+for (i in 1:nMethods) {
+  set.seed(seeds[i])
+  kMean <- kmeans(data,centers=k,iter.max=15)
+  clustering[,i] <- asBranchComponent(kMean)
+}
+distance <- getClusteringDistance(clustering[,1],clustering[,2])
+expect_equal(floor(distance),0)
+####### Generating clusters via K means with 10 random starts #######
+#
+#
+# 2) k = 16
+#
+#
+######
+  
+#random starts
+nRestarts <- 2
+nMethods <- nRestarts
+k <- 16
+seeds <- c(220478, 990173)
+  
+clustering <- array(0, dim=c(n,nMethods))
+for (i in 1:nMethods) {
+  set.seed(seeds[i])
+  kMean <- kmeans(data,centers=k,iter.max=15)
+  clustering[,i] <- asBranchComponent(kMean)
+}
+  
+distance <- getClusteringDistance(clustering[,1],clustering[,2])
+expect_equal(floor(distance),0)
+####### Combining K means (k=2) with Gaussian model based #######
+#
+######
+nMethods <- 2
+clustering <- array(0, dim=c(n, nMethods))
+k <- 2
+clustering[,1] <- kmeans(data,centers=k,iter.max=15)$cluster
+require(mclust)
+clustering[,2] <- Mclust(data)$classification
+
+distance <- getClusteringDistance(clustering[,1],clustering[,2])
+expect_equal(floor(distance),0)
 })
 
