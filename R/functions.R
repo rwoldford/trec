@@ -251,6 +251,8 @@ TRECgetComponentsfromClustering <- function( clustering ) {
 #' 
 getClusteringDistance <- function(branchComponent1, branchComponent2)
 {
+    branchComponent1 <- as.matrix(branchComponent1)
+    branchComponent2 <- as.matrix(branchComponent2)
     n <- nrow(branchComponent1)
     w1 <- vector(mode = 'integer', length = n*(n-1)/2)
     for(j in 2:n)

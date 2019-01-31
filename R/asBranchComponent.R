@@ -16,7 +16,7 @@ asBranchComponent <- function(x)
 #' @export
 asBranchComponent.default<-function(x)
 {
-    as.matrix(x)
+    x
 }
 
 ## adjclust package

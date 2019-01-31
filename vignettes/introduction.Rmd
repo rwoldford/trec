@@ -9,6 +9,69 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+In this vignette we go through how to use this package. Nowadays clustering becomes more and more important in data science area. Lots of applications such as finding patterns, exploratory data analysis and grouping data together make use of clustering algorithms. People have developed a variety of clustering techniques such as k-means, hierarchical clustering, dbscan, etc to cluster the data. However, different algorithms produce different clustering results, and it's very hard to distinguish which it's better. Also, when you produce clustering results from different algorithms, there is also a problem to combine all these clustering results together. TREC stands for tree reduced ensemble clustering, which is an effective algorithm to combine your clustering results together and produce one final clustering.
+
+## How to use TREC
+Here is a sample code for how to use TREC:
+```{r}
+library(TREC)
+# randomly generate our data
+data<-matrix(rnorm(100),nrow=50)
+# producing clustering result cl1,cl2,cl3
+# you may use as many clustering algorithms as you want
+cl1<-hclust(dist(data),method='single')
+cl2<-kmeans(data,centers=3)
+library(dbscan)
+cl3<-dbscan(data,eps = .2)
+# transform cluster result into BranchComponent
+cl1<-asBranchComponent(cl1)
+cl2<-asBranchComponent(cl2)
+cl3<-asBranchComponent(cl3)
+# call TREC function
+final_cluster_result <- TRECgetComponentsfromClustering(cbind(cl1,cl2,cl3))
+```
+From sample code, we can see there are four steps to use TREC:
+
+1. load/generate your data
+
+2. use clustering algorithms to produce clustering result
+
+3. use function asBranchComponent to transform clustering result into matrix
+
+4. use function to cbind matrix result and apply function TRECgetComponentsfromClustering
+
+It's necessary to follow above 4 steps to use TREC. Final cluster result is a matrix, which represent a hierarchical clustering result. Each row represents a data point, and each column represents a layer of clustering result. Each number represents the cluster id that data point is assigned to.
+
+## more examples
+```{r}
+library(TREC)
+# randomly generate our data
+data<-matrix(rnorm(150),nrow=50)
+# producing clustering result cl1,cl2,cl3
+# you may use as many clustering algorithms as you want
+cl1<-hclust(dist(data),method='complete')
+cl2<-kmeans(data,centers=5)
+library(mclust)
+cl3<-Mclust(data,eps = .2)
+# transform cluster result into BranchComponent
+cl1<-asBranchComponent(cl1)
+cl2<-asBranchComponent(cl2)
+cl3<-asBranchComponent(cl3)
+# call TREC function
+final_cluster_result <- TRECgetComponentsfromClustering(cbind(cl1,cl2,cl3))
+
+```
+---
+title: "TREC: tree reduced ensemble clustering"
+author: "Wenqing Liu"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,43 +81,3 @@ knitr::opts_chunk$set(
 
 In this vignette we go through how to use this package. Nowadays clustering becomes more and more important in data science area. Lots of applications such as finding patterns, exploratory data analysis and grouping data together make use of clustering algorithms. People have developed a variety of clustering techniques such as k-means, hierarchical clustering, dbscan, etc to cluster the data. However, different algorithms produce different clustering results, and it's very hard to distinguish which it's better. Also, when you produce clustering results from different algorithms, there is also a problem to combine all these clustering results together. TREC stands for tree reduced ensemble clustering, which is an effective algorithm to combine your clustering results together and produce one final clustering.
 
-## How to use TREC
-
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
