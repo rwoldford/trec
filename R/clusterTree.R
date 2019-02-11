@@ -1,9 +1,10 @@
-#' Get the branch component family from the result of (single/average/complete) linkage clustering.
+#' Get the clusterTree from the result of (single/average/complete) linkage clustering.
 #' @param merge The n-1 by 2 matrix that is the merge component output from
 #' a hierarchical clustering which describes how the n points are merged in the cluster
 #' hierarchy.
-#' @return An n by nlevels matrix where each row corresponds to a data point and each
-#' column identifies a cluster number for that data point in the hierarchy.
+#' @return A clusterTree class object, which contains tree attribute. Its tree attribute is a n by nlevels matrix
+#' where each row corresponds to a data point and each column identifies a cluster number for that data point
+#' in the hierarchy.
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
@@ -11,10 +12,10 @@
 #'               )
 #'               
 #' clust <- stats::hclust(dist(data),method='single')
-#' getComponentsFromMerge(clust$merge)
+#' mergeToTree(clust$merge)
 #' 
 #' @export
-getComponentsFromMerge <- function( merge ) {
+mergeToTree <- function( merge ) {
     
     # m is number of points
     m <- dim(merge)[1]
@@ -91,25 +92,39 @@ getComponentsFromMerge <- function( merge ) {
             }
         }
     }
-    branchComponentFamily
+    tree<-list(tree=branchComponentFamily)
+    class(tree) <- c("clusterTree", class(tree))
+    tree
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
-#' @param clustering a matrix which stands for multiple clustering outcomes each row represent a data point, each column is an assignment of cluster id
+#' @param clustering1 clustering result of method 1
+#' @param clustering2 clustering result of method 2
+#' @param ... other clustering result
 #' @return final one hierarchical clustering
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
 #'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
 #'               )
-#' clust1 <- asBranchComponent(stats::hclust(dist(data),method='single'))
-#' clust2 <- asBranchComponent(kmeans(data,centers=3))
-#' TRECgetComponentsfromClustering(cbind(clust1,clust2))
+#' clustering1<-stats::hclust(dist(data),method='single')
+#' clustering2<-kmeans(data,centers=3)
+#' clustering3<-dbscan::dbscan(data,eps=.1)
+#' combineClusterings(clustering1,clustering2,clustering3)
 #' @export
 #' 
-TRECgetComponentsfromClustering <- function( clustering ) {
+combineClusterings <- function(clustering1, clustering2, ... ) {
+    if (missing(clustering1)) stop("Must provide output of clustering for first argument")
+    if (missing(clustering2)) stop("Must provide output of clustering for second argument")
+    clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
     # n is number of data points
-    n <- dim(clustering)[1]
+    n <- dim(clusterTrees[[1]]$tree)[1]
+    # combine clusterTrees
+    clustering<-clusterTrees[[1]]$tree
+    for(i in 2:length(clusterTrees))
+    {
+        clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
+    }
     # clustering sum of multiple clustering outcomes
     clusteringsum <- array(0,dim = c(n,n))
     for(j in 1:n)
@@ -230,29 +245,30 @@ TRECgetComponentsfromClustering <- function( clustering ) {
             }
         }
     }
-    
-    branchComponentFamily[,2:max(layerSet)]
+    tree<-list(tree=branchComponentFamily[,2:max(layerSet)])
+    class(tree)<-c("clusterTree",class(tree))
+    tree
 }
 
 
 #' Calculate distance of two hierarchical clustering matrix
-#' @param branchComponent1 The first clustering as a branch component
-#' @param branchComponent2 The second clustering as a branch component
+#' @param clustering1 The first clustering as a branch component
+#' @param clustering2 The second clustering as a branch component
 #' @return distance between 0 and square root of 2
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
 #'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
 #'               )
-#' clust1 <- asBranchComponent(stats::hclust(dist(data),method='complete'))
-#' clust2 <- asBranchComponent(stats::hclust(dist(data),method='single'))
+#' clust1 <- stats::hclust(dist(data),method='complete')
+#' clust2 <- stats::hclust(dist(data),method='single')
 #' getClusteringDistance(clust1,clust2)
 #' @export
 #' 
-getClusteringDistance <- function(branchComponent1, branchComponent2)
+getClusteringDistance <- function(clustering1, clustering2)
 {
-    branchComponent1 <- as.matrix(branchComponent1)
-    branchComponent2 <- as.matrix(branchComponent2)
+    branchComponent1 <- getClusterTree(clustering1)$tree
+    branchComponent2 <- getClusterTree(clustering2)$tree
     n <- nrow(branchComponent1)
     w1 <- vector(mode = 'integer', length = n*(n-1)/2)
     for(j in 2:n)
