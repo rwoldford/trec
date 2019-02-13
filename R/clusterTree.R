@@ -1,3 +1,12 @@
+matrixToClusterTree <- function(x){
+    height <- dim(x)[2]
+    n <- dim(x)[1]
+    order <- apply(x,MARGIN = 1,FUN = function(x) sum(x!=0))
+    tree <- list(tree = x, height = height, n = n, order = order)
+    class(tree) <- c("clusterTree", class(tree))
+    tree
+}
+
 #' Get the clusterTree from the result of (single/average/complete) linkage clustering.
 #' @param merge The n-1 by 2 matrix that is the merge component output from
 #' a hierarchical clustering which describes how the n points are merged in the cluster
@@ -92,8 +101,7 @@ mergeToTree <- function( merge ) {
             }
         }
     }
-    tree<-list(tree=branchComponentFamily)
-    class(tree) <- c("clusterTree", class(tree))
+    tree <- matrixToClusterTree(branchComponentFamily)
     tree
 }
 
@@ -245,8 +253,7 @@ combineClusterings <- function(clustering1, clustering2, ... ) {
             }
         }
     }
-    tree<-list(tree=branchComponentFamily[,2:max(layerSet)])
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerSet)])
     tree
 }
 
@@ -301,6 +308,8 @@ getClusteringDistance <- function(clustering1, clustering2)
     }
     sqrt(sum((w1-w2)^2))
 }
+
+
 
 ########################################################################################################################
 # require(igraph)

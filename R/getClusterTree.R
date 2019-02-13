@@ -37,8 +37,7 @@ getClusterTree.chac <- function(x)
 getClusterTree.adpclust <- function(x)
 {
     x <- as.matrix(x$clusters)
-    tree <- list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -47,8 +46,7 @@ getClusterTree.adpclust <- function(x)
 getClusterTree.afCEC <- function(x)
 {
     x<-as.matrix(x$labels)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -57,8 +55,7 @@ getClusterTree.afCEC <- function(x)
 getClusterTree.apcluster <- function(x)
 {
     x<-as.matrix(x)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 #' @export
@@ -87,8 +84,7 @@ getClusterTree.bclustvs <- function(x)
 getClusterTree.ccfkms <- function(x)
 {
     x<-as.matrix(x$cl)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -96,7 +92,9 @@ getClusterTree.ccfkms <- function(x)
 #' @export
 getClusterTree.cclust <- function(x)
 {
-    x$cluster
+    x <- as.matrix(x$cluster)
+    tree <- matrixToClusterTree(x)
+    tree
 }
 
 ##  package CEC
@@ -104,8 +102,7 @@ getClusterTree.cclust <- function(x)
 getClusterTree.cec <- function(x)
 {
     x<-as.matrix(x$cluster)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -114,8 +111,7 @@ getClusterTree.cec <- function(x)
 getClusterTree.Ckmeans.1d.dp <- function(x)
 {
     x<-as.matrix(x$cluster)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -124,8 +120,7 @@ getClusterTree.Ckmeans.1d.dp <- function(x)
 getClusterTree.clues <- function(x)
 {
     x<-as.matrix(x$mem)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -140,8 +135,7 @@ getClusterTree.agnes <- function(x)
 getClusterTree.clara <- function(x)
 {
     x<-as.matrix(x$clustering)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -155,8 +149,7 @@ getClusterTree.diana <- function(x)
 getClusterTree.fanny <- function(x)
 {
     x<-as.matrix(x$clustering)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -164,8 +157,7 @@ getClusterTree.fanny <- function(x)
 getClusterTree.pam <- function(x)
 {
     x<-as.matrix(x$clustering)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -215,8 +207,7 @@ getClusterTree.dbscan_fast <- function(x)
         }
     }
     x<-as.matrix(tmp)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -242,8 +233,7 @@ getClusterTree.hclust <- function(x)
 getClusterTree.specc <- function(x)
 {
     x<-as.matrix(x@.Data)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -252,8 +242,7 @@ getClusterTree.specc <- function(x)
 getClusterTree.kmeans <- function(x)
 {
     x<-as.matrix(x$cluster)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -262,8 +251,7 @@ getClusterTree.kmeans <- function(x)
 getClusterTree.Mclust <- function(x)
 {
     x<-as.matrix(x$classification)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
