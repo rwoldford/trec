@@ -23,12 +23,8 @@ cl1<-hclust(dist(data),method='single')
 cl2<-kmeans(data,centers=3)
 library(dbscan)
 cl3<-dbscan(data,eps = .2)
-# transform cluster result into BranchComponent
-cl1<-asBranchComponent(cl1)
-cl2<-asBranchComponent(cl2)
-cl3<-asBranchComponent(cl3)
-# call TREC function
-final_cluster_result <- TRECgetComponentsfromClustering(cbind(cl1,cl2,cl3))
+# call combineClusterings function
+final_cluster_result <- combineClusterings(cl1,cl2,cl3)
 ```
 From sample code, we can see there are four steps to use TREC:
 
@@ -53,31 +49,8 @@ cl1<-hclust(dist(data),method='complete')
 cl2<-kmeans(data,centers=5)
 library(mclust)
 cl3<-Mclust(data,eps = .2)
-# transform cluster result into BranchComponent
-cl1<-asBranchComponent(cl1)
-cl2<-asBranchComponent(cl2)
-cl3<-asBranchComponent(cl3)
 # call TREC function
-final_cluster_result <- TRECgetComponentsfromClustering(cbind(cl1,cl2,cl3))
-
-```
----
-title: "TREC: tree reduced ensemble clustering"
-author: "Wenqing Liu"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+final_cluster_result <- combineClusterings(cl1,cl2,cl3)
 ```
 
-In this vignette we go through how to use this package. Nowadays clustering becomes more and more important in data science area. Lots of applications such as finding patterns, exploratory data analysis and grouping data together make use of clustering algorithms. People have developed a variety of clustering techniques such as k-means, hierarchical clustering, dbscan, etc to cluster the data. However, different algorithms produce different clustering results, and it's very hard to distinguish which it's better. Also, when you produce clustering results from different algorithms, there is also a problem to combine all these clustering results together. TREC stands for tree reduced ensemble clustering, which is an effective algorithm to combine your clustering results together and produce one final clustering.
 

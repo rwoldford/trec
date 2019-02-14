@@ -1,0 +1,9 @@
+trec.Rproj
+man-roxygen
+.DS_Store
+.gitignore
+.Rhistory
+../.DS_Store
+../.gitignore
+^.*\.Rproj$
+^\.Rproj\.user$
