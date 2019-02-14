@@ -215,9 +215,9 @@ getClusterTree.dbscan_fast <- function(x)
 #' @export
 getClusterTree.fclust <- function(x)
 {
-    x<-as.matrix(x$clus)
-    tree<-list(tree=x)
-    class(tree)<-c("clusterTree",class(tree))
+    x <- as.matrix(x$clus)
+    tree <- list(tree = x)
+    class(tree) <- c("clusterTree", class(tree))
     tree
 }
 

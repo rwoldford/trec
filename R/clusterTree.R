@@ -1,10 +1,11 @@
-matrixToClusterTree <- function(x){
-    height <- dim(x)[2]
-    n <- dim(x)[1]
-    order <- apply(x,MARGIN = 1,FUN = function(x) sum(x!=0))
-    tree <- list(tree = x, height = height, n = n, order = order)
-    class(tree) <- c("clusterTree", class(tree))
-    tree
+matrixToClusterTree <- function(x, labels = NULL){
+  colnames(x) <- paste("Level", 1:ncol(x))
+  if (is.null(labels)) labels <- paste("object", 1:nrow(x))
+  rownames(x) <- labels
+  order <- apply(x, MARGIN = 1, FUN = function(x) sum(x!=0))
+  tree <- list(tree = x, labels = labels)
+  class(tree) <- c("clusterTree", class(tree))
+  tree
 }
 
 #' Get the clusterTree from the result of (single/average/complete) linkage clustering.
@@ -25,84 +26,84 @@ matrixToClusterTree <- function(x){
 #' 
 #' @export
 mergeToTree <- function( merge ) {
-    
-    # m is number of points
-    m <- dim(merge)[1]
-    n <- m + 1
-    
-    verticesSets <- array(0,dim=c(m,n))
-    componentSets <- array(0,dim=c(m,n))
-    layerSet <- array(0,dim=c(m,1))
-    
-    # get the coorresponding vertices set for each row in merge
-    for (i in 1:m) {
-        location <- 1
-        for (j in 1:2) {
-            getValue <- merge[i,j]
-            if (getValue < 0) {
-                verticesSets[i,location] <- getValue * -1
-                location <- location + 1
-            }
-            if (getValue > 0) {
-                k <- 1
-                while (verticesSets[getValue,k] != 0) {
-                    verticesSets[i,location] <- verticesSets[getValue,k]
-                    location <- location + 1
-                    k <- k + 1
-                }
-            }
+  
+  # m is number of points
+  m <- dim(merge)[1]
+  n <- m + 1
+  
+  verticesSets <- array(0,dim=c(m,n))
+  componentSets <- array(0,dim=c(m,n))
+  layerSet <- array(0,dim=c(m,1))
+  
+  # get the coorresponding vertices set for each row in merge
+  for (i in 1:m) {
+    location <- 1
+    for (j in 1:2) {
+      getValue <- merge[i,j]
+      if (getValue < 0) {
+        verticesSets[i,location] <- getValue * -1
+        location <- location + 1
+      }
+      if (getValue > 0) {
+        k <- 1
+        while (verticesSets[getValue,k] != 0) {
+          verticesSets[i,location] <- verticesSets[getValue,k]
+          location <- location + 1
+          k <- k + 1
         }
+      }
     }
-    
-    # get the coorresponding components for each row in merge
-    for (i in m:1) {
-        index <- i
-        if (i==m) {
-            layerSet[i] <- 1
-        }
-        componentId <- 1
-        
-        for (j in 1:2) {
-            getValue <- merge[i,j]
-            if (getValue < 0) {
-                index2 <- -1 * getValue
-                componentSets[index,index2] <- componentId
-                componentId <- componentId + 1
-            }
-            if (getValue > 0) {
-                layerSet[getValue] <- layerSet[i] + 1
-                k <- 1
-                while (verticesSets[getValue,k] != 0) {
-                    index2 <- verticesSets[getValue,k]
-                    componentSets[index,index2] <- componentId
-                    k <- k + 1
-                    
-                }
-                componentId <- componentId + 1
-            }
-            
-        }
+  }
+  
+  # get the coorresponding components for each row in merge
+  for (i in m:1) {
+    index <- i
+    if (i==m) {
+      layerSet[i] <- 1
     }
+    componentId <- 1
     
-    branchComponentFamily <- array(0, dim=c(n,max(layerSet)+1))
-    branchComponentFamily[,1] <- rep(1,n)
-    
-    # get all the components for each layer of the dendrogram, and then form the branch component family
-    for (i in 1:max(layerSet)) {
-        clusterId <- 0
-        for (j in 1:m) {
-            if (layerSet[j] == i) {
-                for (k in 1:n) {
-                    if (componentSets[j,k] > 0) {
-                        branchComponentFamily[k,i+1] <- clusterId + componentSets[j,k]
-                    }
-                }
-                clusterId <- clusterId + 2
-            }
+    for (j in 1:2) {
+      getValue <- merge[i,j]
+      if (getValue < 0) {
+        index2 <- -1 * getValue
+        componentSets[index,index2] <- componentId
+        componentId <- componentId + 1
+      }
+      if (getValue > 0) {
+        layerSet[getValue] <- layerSet[i] + 1
+        k <- 1
+        while (verticesSets[getValue,k] != 0) {
+          index2 <- verticesSets[getValue,k]
+          componentSets[index,index2] <- componentId
+          k <- k + 1
+          
         }
+        componentId <- componentId + 1
+      }
+      
     }
-    tree <- matrixToClusterTree(branchComponentFamily)
-    tree
+  }
+  
+  branchComponentFamily <- array(0, dim=c(n,max(layerSet)+1))
+  branchComponentFamily[,1] <- rep(1,n)
+  
+  # get all the components for each layer of the dendrogram, and then form the branch component family
+  for (i in 1:max(layerSet)) {
+    clusterId <- 0
+    for (j in 1:m) {
+      if (layerSet[j] == i) {
+        for (k in 1:n) {
+          if (componentSets[j,k] > 0) {
+            branchComponentFamily[k,i+1] <- clusterId + componentSets[j,k]
+          }
+        }
+        clusterId <- clusterId + 2
+      }
+    }
+  }
+  tree <- matrixToClusterTree(branchComponentFamily)
+  tree
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
@@ -121,140 +122,142 @@ mergeToTree <- function( merge ) {
 #' combineClusterings(clustering1,clustering2,clustering3)
 #' 
 #' @export
-combineClusterings <- function(clustering1, clustering2, ... ) {
-    if (missing(clustering1)) stop("Must provide output of clustering for first argument")
-    if (missing(clustering2)) stop("Must provide output of clustering for second argument")
-    clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
-    # n is number of data points
-    n <- dim(clusterTrees[[1]]$tree)[1]
-    # combine clusterTrees
-    clustering<-clusterTrees[[1]]$tree
-    for(i in 2:length(clusterTrees))
+combineClusterings <- function(clustering1, clustering2, 
+                               ..., labels = NULL) {
+  if (missing(clustering1)) stop("Must provide output of clustering for first argument")
+  if (missing(clustering2)) stop("Must provide output of clustering for second argument")
+  clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
+  
+  # n is number of data points
+  n <- dim(clusterTrees[[1]]$tree)[1]
+  # combine clusterTrees
+  clustering<-clusterTrees[[1]]$tree
+  for(i in 2:length(clusterTrees))
+  {
+    clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
+  }
+  # clustering sum of multiple clustering outcomes
+  clusteringsum <- array(0,dim = c(n,n))
+  for(j in 1:n)
+  {
+    for(k in 1:j)
     {
-        clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
+      clusteringsum[j,k] <- sum((clustering[j,]!=0)&
+                                  (clustering[k,]!=0)&
+                                  (clustering[j,]==clustering[k,]))
     }
-    # clustering sum of multiple clustering outcomes
-    clusteringsum <- array(0,dim = c(n,n))
-    for(j in 1:n)
+  }
+  
+  # use single linkage method to produce result for trec
+  distance <- stats::as.dist(clusteringsum)
+  singlelinkage <- stats::hclust(-distance, method = "single")
+  merge <- singlelinkage$merge
+  height <- singlelinkage$height
+  
+  clusteringsum <- array(0,dim = c(n,n))
+  for(j in 2:n)
+  {
+    for(k in 1:(j-1))
     {
-        for(k in 1:j)
-        {
-            clusteringsum[j,k] <- sum((clustering[j,]!=0)&
-                                          (clustering[k,]!=0)&
-                                          (clustering[j,]==clustering[k,]))
-        }
+      clusteringsum[j,k] <- sum((clustering[j,]!=0)&
+                                  (clustering[k,]!=0)&
+                                  (clustering[j,]==clustering[k,]))
     }
-    
-    # use single linkage method to produce result for trec
-    distance <- stats::as.dist(clusteringsum)
-    singlelinkage <- stats::hclust(-distance, method = "single")
-    merge <- singlelinkage$merge
-    height <- singlelinkage$height
-    
-    clusteringsum <- array(0,dim = c(n,n))
-    for(j in 2:n)
+  }
+  
+  distance <- stats::as.dist(clusteringsum)
+  singlelinkage <- stats::hclust(-distance, method = "single")
+  merge <- singlelinkage$merge
+  height <- singlelinkage$height
+  
+  m <- dim(merge)[1]
+  n <- m + 1
+  
+  verticesSets <- array(0,dim = c(m,n))
+  layerSet <- array(0, dim = c(m,1))
+  
+  shrink <- array(0, dim = c(m,1))
+  for(i in m:1)
+  {
+    if(merge[i,1]>0 && height[i]==height[merge[i,1]])
     {
-        for(k in 1:(j-1))
-        {
-            clusteringsum[j,k] <- sum((clustering[j,]!=0)&
-                                          (clustering[k,]!=0)&
-                                          (clustering[j,]==clustering[k,]))
-        }
+      shrink[merge[i,1]]=TRUE
     }
-    
-    distance <- stats::as.dist(clusteringsum)
-    singlelinkage <- stats::hclust(-distance, method = "single")
-    merge <- singlelinkage$merge
-    height <- singlelinkage$height
-    
-    m <- dim(merge)[1]
-    n <- m + 1
-    
-    verticesSets <- array(0,dim = c(m,n))
-    layerSet <- array(0, dim = c(m,1))
-    
-    shrink <- array(0, dim = c(m,1))
-    for(i in m:1)
+    if(merge[i,2]>0 && height[i]==height[merge[i,2]])
     {
-        if(merge[i,1]>0 && height[i]==height[merge[i,1]])
+      shrink[merge[i,2]]=TRUE
+    }
+    if(merge[i,1]<0 && merge[i,2]>0)
+    {
+      shrink[merge[i,2]]=TRUE
+    }
+    #if(merge[i,1]>0 && merge[i,2]<0)
+    #{
+    #  shrink[merge[i,1]]=TRUE
+    #}
+  }
+  
+  for (i in 1:m) {
+    location <- 1
+    for (j in 1:2) {
+      getValue <- merge[i,j]
+      if (getValue < 0) {
+        verticesSets[i,location] <- getValue * -1
+        location <- location + 1
+      }
+      if (getValue > 0) {
+        k <- 1
+        while (verticesSets[getValue,k] != 0) {
+          verticesSets[i,location] <- verticesSets[getValue,k]
+          location <- location + 1
+          k <- k + 1
+        }
+      }
+    }
+  }
+  
+  for (i in m:1) {
+    index <- i
+    if (i==m) {
+      layerSet[i] <- 1
+    }
+    
+    for (j in 1:2) {
+      getValue <- merge[i,j]
+      if (getValue < 0) {
+      }
+      if (getValue > 0) {
+        if(shrink[getValue])
         {
-            shrink[merge[i,1]]=TRUE
+          layerSet[getValue] <- layerSet[i]
         }
-        if(merge[i,2]>0 && height[i]==height[merge[i,2]])
+        else
         {
-            shrink[merge[i,2]]=TRUE
+          layerSet[getValue] <- layerSet[i] + 1
         }
-        if(merge[i,1]<0 && merge[i,2]>0)
+      }
+    }
+  }
+  
+  
+  branchComponentFamily <- array(0, dim=c(n,max(layerSet)))
+  for (i in 1:max(layerSet)) {
+    clusterId <- 1
+    for (j in 1:m) {
+      if (layerSet[j] == i && shrink[j]==FALSE) {
+        for(k in 1:n)
         {
-            shrink[merge[i,2]]=TRUE
+          if(verticesSets[j,k]>0)
+          {
+            branchComponentFamily[verticesSets[j,k],i] <- clusterId
+          }
         }
-        #if(merge[i,1]>0 && merge[i,2]<0)
-        #{
-        #  shrink[merge[i,1]]=TRUE
-        #}
+        clusterId <- clusterId + 1
+      }
     }
-    
-    for (i in 1:m) {
-        location <- 1
-        for (j in 1:2) {
-            getValue <- merge[i,j]
-            if (getValue < 0) {
-                verticesSets[i,location] <- getValue * -1
-                location <- location + 1
-            }
-            if (getValue > 0) {
-                k <- 1
-                while (verticesSets[getValue,k] != 0) {
-                    verticesSets[i,location] <- verticesSets[getValue,k]
-                    location <- location + 1
-                    k <- k + 1
-                }
-            }
-        }
-    }
-    
-    for (i in m:1) {
-        index <- i
-        if (i==m) {
-            layerSet[i] <- 1
-        }
-        
-        for (j in 1:2) {
-            getValue <- merge[i,j]
-            if (getValue < 0) {
-            }
-            if (getValue > 0) {
-                if(shrink[getValue])
-                {
-                    layerSet[getValue] <- layerSet[i]
-                }
-                else
-                {
-                    layerSet[getValue] <- layerSet[i] + 1
-                }
-            }
-        }
-    }
-    
-    
-    branchComponentFamily <- array(0, dim=c(n,max(layerSet)))
-    for (i in 1:max(layerSet)) {
-        clusterId <- 1
-        for (j in 1:m) {
-            if (layerSet[j] == i && shrink[j]==FALSE) {
-                for(k in 1:n)
-                {
-                    if(verticesSets[j,k]>0)
-                    {
-                        branchComponentFamily[verticesSets[j,k],i] <- clusterId
-                    }
-                }
-                clusterId <- clusterId + 1
-            }
-        }
-    }
-    tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerSet)])
-    tree
+  }
+  tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerSet)])
+  tree
 }
 
 
@@ -274,39 +277,39 @@ combineClusterings <- function(clustering1, clustering2, ... ) {
 #' 
 getClusteringDistance <- function(clustering1, clustering2)
 {
-    branchComponent1 <- getClusterTree(clustering1)$tree
-    branchComponent2 <- getClusterTree(clustering2)$tree
-    n <- nrow(branchComponent1)
-    w1 <- vector(mode = 'integer', length = n*(n-1)/2)
-    for(j in 2:n)
+  branchComponent1 <- getClusterTree(clustering1)$tree
+  branchComponent2 <- getClusterTree(clustering2)$tree
+  n <- nrow(branchComponent1)
+  w1 <- vector(mode = 'integer', length = n*(n-1)/2)
+  for(j in 2:n)
+  {
+    for(k in 1:(j-1))
     {
-        for(k in 1:(j-1))
-        {
-            w1[(j-1)*(j-2)/2+k] <- sum((branchComponent1[j,]!=0)&
-                                           (branchComponent1[k,]!=0)&
-                                           (branchComponent1[j,]==branchComponent1[k,]))
-        }
+      w1[(j-1)*(j-2)/2+k] <- sum((branchComponent1[j,]!=0)&
+                                   (branchComponent1[k,]!=0)&
+                                   (branchComponent1[j,]==branchComponent1[k,]))
     }
-    w2 <- vector(mode = 'integer', length = n*(n-1)/2)
-    for(j in 2:n)
+  }
+  w2 <- vector(mode = 'integer', length = n*(n-1)/2)
+  for(j in 2:n)
+  {
+    for(k in 1:(j-1))
     {
-        for(k in 1:(j-1))
-        {
-            w2[(j-1)*(j-2)/2+k] <- sum((branchComponent2[j,]!=0)&
-                                           (branchComponent2[k,]!=0)&
-                                           (branchComponent2[j,]==branchComponent2[k,]))
-        }
+      w2[(j-1)*(j-2)/2+k] <- sum((branchComponent2[j,]!=0)&
+                                   (branchComponent2[k,]!=0)&
+                                   (branchComponent2[j,]==branchComponent2[k,]))
     }
-    #w1<- w1 - 1
-    if (sum(w1^2) > 0) {
-        w1 <- w1/sqrt(sum(w1^2))
-    }
-    
-    #w2 <- w2 - 1
-    if (sum(w2^2) > 0) {
-        w2 <- w2/sqrt(sum(w2^2))
-    }
-    sqrt(sum((w1-w2)^2))
+  }
+  #w1<- w1 - 1
+  if (sum(w1^2) > 0) {
+    w1 <- w1/sqrt(sum(w1^2))
+  }
+  
+  #w2 <- w2 - 1
+  if (sum(w2^2) > 0) {
+    w2 <- w2/sqrt(sum(w2^2))
+  }
+  sqrt(sum((w1-w2)^2))
 }
 
 
