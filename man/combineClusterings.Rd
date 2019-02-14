@@ -24,14 +24,9 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
               )
-<<<<<<< HEAD:man/TRECgetComponentsfromClustering.Rd
-clust1 <- asBranchComponent(stats::hclust(dist(data),method='single'))
-clust2 <- asBranchComponent(kmeans(data,centers=3))
-TRECgetComponentsfromClustering(cbind(clust1,clust2))
-=======
+
 clustering1<-stats::hclust(dist(data),method='single')
 clustering2<-kmeans(data,centers=3)
 clustering3<-dbscan::dbscan(data,eps=.1)
 combineClusterings(clustering1,clustering2,clustering3)
->>>>>>> 9341cc8391681e0548b437ad99bcfe34ea528aee:man/combineClusterings.Rd
 }
