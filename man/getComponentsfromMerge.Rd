@@ -24,7 +24,7 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
               )
               
-cl <- stats::hclust(dist(data),method='single')
-getComponentsFromMerge(cl$merge)
+clust <- stats::hclust(dist(data),method='single')
+getComponentsFromMerge(clust$merge)
 
 }

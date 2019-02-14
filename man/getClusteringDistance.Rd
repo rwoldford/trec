@@ -22,7 +22,7 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
               )
-clu1<-asBranchComponent(stats::hclust(dist(data),method='complete'))
-clu2<-asBranchComponent(stats::hclust(dist(data),method='single'))
-getClusteringDistance(clu1,clu2)
+clust1 <- asBranchComponent(stats::hclust(dist(data),method='complete'))
+clust2 <- asBranchComponent(stats::hclust(dist(data),method='single'))
+getClusteringDistance(clust1,clust2)
 }

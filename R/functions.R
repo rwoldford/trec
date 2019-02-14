@@ -95,7 +95,8 @@ getComponentsFromMerge <- function( merge ) {
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
-#' @param clustering a matrix which stands for multiple clustering outcomes each row represent a data point, each column is an assignment of cluster id
+#' @param clustering a matrix which stands for multiple clustering outcomes 
+#' each row represent a data point, each column is an assignment of cluster id
 #' @return final one hierarchical clustering
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),

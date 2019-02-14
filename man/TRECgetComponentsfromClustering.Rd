@@ -20,7 +20,7 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
               )
-cl1<-asBranchComponent(stats::hclust(dist(data),method='single'))
-cl2<-asBranchComponent(kmeans(data,centers=3))
-TRECgetComponentsfromClustering(cbind(cl1,cl2))
+clust1 <- asBranchComponent(stats::hclust(dist(data),method='single'))
+clust2 <- asBranchComponent(kmeans(data,centers=3))
+TRECgetComponentsfromClustering(cbind(clust1,clust2))
 }
