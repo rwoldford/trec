@@ -29,8 +29,4 @@ S3method(getClusterTree,specc)
 export(combineClusterings)
 export(getClusterTree)
 export(getClusteringDistance)
-<<<<<<< HEAD
-export(getComponentsFromMerge)
-=======
 export(mergeToTree)
->>>>>>> 9341cc8391681e0548b437ad99bcfe34ea528aee
