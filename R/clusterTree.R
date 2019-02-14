@@ -106,14 +106,9 @@ mergeToTree <- function( merge ) {
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
-<<<<<<< HEAD:R/functions.R
-#' @param clustering a matrix which stands for multiple clustering outcomes 
-#' each row represent a data point, each column is an assignment of cluster id
-=======
 #' @param clustering1 clustering result of method 1
 #' @param clustering2 clustering result of method 2
-#' @param ... other clustering result
->>>>>>> 9341cc8391681e0548b437ad99bcfe34ea528aee:R/clusterTree.R
+#' @param ... other clustering results
 #' @return final one hierarchical clustering
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
@@ -124,8 +119,8 @@ mergeToTree <- function( merge ) {
 #' clustering2<-kmeans(data,centers=3)
 #' clustering3<-dbscan::dbscan(data,eps=.1)
 #' combineClusterings(clustering1,clustering2,clustering3)
-#' @export
 #' 
+#' @export
 combineClusterings <- function(clustering1, clustering2, ... ) {
     if (missing(clustering1)) stop("Must provide output of clustering for first argument")
     if (missing(clustering2)) stop("Must provide output of clustering for second argument")
