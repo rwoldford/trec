@@ -2,7 +2,6 @@ matrixToClusterTree <- function(x, labels = NULL){
   colnames(x) <- paste("Level", 1:ncol(x))
   if (is.null(labels)) labels <- paste("object", 1:nrow(x))
   rownames(x) <- labels
-  order <- apply(x, MARGIN = 1, FUN = function(x) sum(x!=0))
   tree <- list(tree = x, labels = labels)
   class(tree) <- c("clusterTree", class(tree))
   tree
@@ -12,7 +11,7 @@ matrixToClusterTree <- function(x, labels = NULL){
 #' @param merge The n-1 by 2 matrix that is the merge component output from
 #' a hierarchical clustering which describes how the n points are merged in the cluster
 #' hierarchy.
-#' @return A clusterTree class object, which contains tree attribute. Its tree attribute is a n by nlevels matrix
+#' @return A matrix which represent the clustering result. This matrix is a n by nlevels matrix
 #' where each row corresponds to a data point and each column identifies a cluster number for that data point
 #' in the hierarchy.
 #' @examples
@@ -22,10 +21,10 @@ matrixToClusterTree <- function(x, labels = NULL){
 #'               )
 #'               
 #' clust <- stats::hclust(dist(data),method='single')
-#' mergeToTree(clust$merge)
+#' mergeToMatrix(clust$merge)
 #' 
 #' @export
-mergeToTree <- function( merge ) {
+mergeToMatrix <- function( merge ) {
   
   # m is number of points
   m <- dim(merge)[1]
@@ -102,15 +101,16 @@ mergeToTree <- function( merge ) {
       }
     }
   }
-  tree <- matrixToClusterTree(branchComponentFamily)
-  tree
+  branchComponentFamily
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
 #' @param clustering1 clustering result of method 1
 #' @param clustering2 clustering result of method 2
 #' @param ... other clustering results
-#' @return final one hierarchical clustering
+#' @param labels labels of data points in clustering methods
+#' @return a clusterTree object, which is the final clustering result which combines 
+#' all input clustering results
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
@@ -256,7 +256,7 @@ combineClusterings <- function(clustering1, clustering2,
       }
     }
   }
-  tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerSet)])
+  tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerSet)],labels = labels)
   tree
 }
 

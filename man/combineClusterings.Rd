@@ -4,7 +4,7 @@
 \alias{combineClusterings}
 \title{This is a new ensemble method for combining multiple clustering outcomes}
 \usage{
-combineClusterings(clustering1, clustering2, ...)
+combineClusterings(clustering1, clustering2, ..., labels = NULL)
 }
 \arguments{
 \item{clustering1}{clustering result of method 1}
@@ -12,9 +12,12 @@ combineClusterings(clustering1, clustering2, ...)
 \item{clustering2}{clustering result of method 2}
 
 \item{...}{other clustering results}
+
+\item{labels}{labels of data points in clustering methods}
 }
 \value{
-final one hierarchical clustering
+a clusterTree object, which is the final clustering result which combines 
+all input clustering results
 }
 \description{
 This is a new ensemble method for combining multiple clustering outcomes
