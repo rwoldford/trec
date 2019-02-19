@@ -15,14 +15,20 @@ getClusterTree <- function(x)
 
 #' @export
 getClusterTree.clusterTree <- function(x) {
-  class(x) <- unique(c("clusterTree", class(x)))
-  x
+    class(x) <- unique(c("clusterTree", class(x)))
+    x
 }
 
 #' @export
-getClusterTree.default<-function(x)
+getClusterTree.default <- function(x)
 {
     stop("Not a clustering")
+}
+
+#' @export
+getClusterTree.matrix <- function(x)
+{
+    matrixToClusterTree(x) 
 }
 
 ## adjclust package
