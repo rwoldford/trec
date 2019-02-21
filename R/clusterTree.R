@@ -2,6 +2,23 @@ matrixToClusterTree <- function(x, labels = NULL){
   colnames(x) <- paste("Level", 1:ncol(x))
   if (is.null(labels)) labels <- paste("object", 1:nrow(x))
   rownames(x) <- labels
+  ###############################
+  mapZerosToNA <- function(x){
+    for (i in 1:length(x)) {
+      if(x[i]==0){
+        x[i:length(x)] <- NA
+        break
+      }
+    }
+    x
+  }
+  if(ncol(x)==1){
+    x <- as.matrix(apply(x, 1, mapZerosToNA))
+  }
+  else{
+    x <- t(apply(x, 1, mapZerosToNA))
+  }
+  ###############################
   tree <- list(tree = x, labels = labels)
   class(tree) <- c("clusterTree", class(tree))
   tree
@@ -136,6 +153,7 @@ combineClusterings <- function(clustering1, clustering2,
   {
     clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
   }
+  clustering[is.na(clustering)] <- 0
   # clustering sum of multiple clustering outcomes
   clusteringsum <- array(0,dim = c(n,n))
   for(j in 1:n)
@@ -279,6 +297,8 @@ getClusteringDistance <- function(clustering1, clustering2)
 {
   branchComponent1 <- getClusterTree(clustering1)$tree
   branchComponent2 <- getClusterTree(clustering2)$tree
+  branchComponent1[is.na(branchComponent1)] <- 0
+  branchComponent2[is.na(branchComponent2)] <- 0
   n <- nrow(branchComponent1)
   w1 <- vector(mode = 'integer', length = n*(n-1)/2)
   for(j in 2:n)
