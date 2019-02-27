@@ -367,5 +367,87 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
 plot.clusterTree <- function(x){
   order <- reOrderClusterTreeMatrix(x$tree)
   orderedTree <- x$tree[order,]
-  
+  plot.new()
+  #plot(c(0,1),c(0,1))
+  plot.clusterTreeHelper(orderedTree,0,0,1,1)
 }
+
+plot.clusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
+  n <- dim(x)[1]  
+  if(dim(x)[2]==1){
+    start <- 1
+    left <- .0
+    res <- c()
+    while(start <= n){
+      if(!is.na(x[start,1])){
+        jj <- start
+        while (!is.na(x[jj,1]) & x[jj,1]==x[start,1]) {
+          if(jj<n){ jj <- jj+1 }
+          else{ break }
+        }
+        if(jj==n){ jj <- jj+1 }
+        right <- left + (jj-start)/n*(xright - xleft)
+        lambda <- .2
+        xl <- xleft+left+lambda*(right-left)
+        yb <- ybottom+lambda*(ytop-ybottom)
+        xr <- xleft+left+(1-lambda)*(right-left)
+        yt <- ybottom+(1-lambda)*(ytop-ybottom)
+        rect(xl,yb,xr,yt)
+        print(c(xl,yb,xr,yt))
+        res <- c(res,c(xl,yb,xr,yt))
+        start <- jj
+        left <- right
+      }
+      else{
+        break
+      }
+    }
+    res
+  }
+  else{
+    start <- 1
+    left <- .0
+    res <- c()
+    while (start <= n) {
+      if(!is.na(x[start,1])){
+        jj <- start
+        while(!is.na(x[jj,1]) & x[jj,1]==x[start,1]){
+          if(jj<n){ jj <- jj+1 }
+          else{ break }
+        }
+        if(jj==n){ jj <- jj+1 }
+        right <- left + (jj-start)/n*(xright - xleft)
+        ybottomupdate <- ybottom + (ytop-ybottom)/dim(x)[2]
+        lambda <- .2
+        xl <- xleft+left+lambda*(right-left)
+        yb <- ybottom+lambda*(ybottomupdate-ybottom)
+        xr <- xleft+left+(1-lambda)*(right-left)
+        yt <- ybottom+(1-lambda)*(ybottomupdate-ybottom)
+        rect(xl,yb,xr,yt)
+        res <- c(res,c(xl,yb,xr,yt))
+        #rect(xleft+left,ybottom,xleft+right,ybottomupdate)
+        rectangles <- plot.clusterTreeHelper(as.matrix(x[start:(jj-1),2:dim(x)[2]]),xleft+left,ybottomupdate,xleft+right,ytop)
+        if(length(rectangles)>=4){
+          #print('rectangles= ')
+          #print(rectangles)
+          for (ii in 1:(length(rectangles)/4)) {
+            #print(ii)
+            #print('lower')
+            #print(c(xl,yb,xr,yt))
+            #print(c((xl+xr)/2,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2,rectangles[ii*4-2]))
+            segments((xl+xr)/2.,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2.,rectangles[ii*4-2])
+          }
+        }
+        start <- jj
+        left <- right
+      }
+      else{
+        break
+      }
+    }
+    res
+  }
+}
+
+
+
