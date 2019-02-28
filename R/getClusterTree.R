@@ -15,21 +15,27 @@ getClusterTree <- function(x)
 
 #' @export
 getClusterTree.clusterTree <- function(x) {
-  class(x) <- unique(c("clusterTree", class(x)))
-  x
+    class(x) <- unique(c("clusterTree", class(x)))
+    x
 }
 
 #' @export
-getClusterTree.default<-function(x)
+getClusterTree.default <- function(x)
 {
     stop("Not a clustering")
+}
+
+#' @export
+getClusterTree.matrix <- function(x)
+{
+    matrixToClusterTree(x) 
 }
 
 ## adjclust package
 #' @export
 getClusterTree.chac <- function(x)
 {
-    mergeToTree(x$merge)
+    matrixToClusterTree(mergeToMatrix(x$merge),labels = x$labels)
 }
 
 ## adpclust package
@@ -61,20 +67,20 @@ getClusterTree.apcluster <- function(x)
 #' @export
 getClusterTree.AggExResul <- function(x)
 {
-    mergeToTree(x$merge)
+    matrixToClusterTree(mergeToMatrix(x$merge),x$labels)
 }
 
 ## bclust package
 #' @export
 getClusterTree.bclust <- function(x)
 {
-    mergeToTree(x$merge)
+    matrixToClusterTree(mergeToMatrix(x$merge),x$labels)
 }
 
 #' @export
 getClusterTree.bclustvs <- function(x)
 {
-    mergeToTree(x$merge)
+    matrixToClusterTree(mergeToMatrix(x$merge),x$labels)
 }
 
 ## biclust package  #Nothing needed here
@@ -128,7 +134,7 @@ getClusterTree.clues <- function(x)
 #' @export
 getClusterTree.agnes <- function(x)
 {
-    mergeToTree(x$merge)
+   matrixToClusterTree(mergeToMatrix(x$merge),x$labels)
 }
 
 #' @export
@@ -142,7 +148,7 @@ getClusterTree.clara <- function(x)
 #' @export
 getClusterTree.diana <- function(x)
 {
-    mergeToTree(x$merge)
+    matrixToClusterTree(mergeToMatrix(x$merge),x$labels)
 }
 
 #' @export
@@ -216,8 +222,7 @@ getClusterTree.dbscan_fast <- function(x)
 getClusterTree.fclust <- function(x)
 {
     x <- as.matrix(x$clus)
-    tree <- list(tree = x)
-    class(tree) <- c("clusterTree", class(tree))
+    tree <- matrixToClusterTree(x)
     tree
 }
 
@@ -225,7 +230,7 @@ getClusterTree.fclust <- function(x)
 #' @export
 getClusterTree.hclust <- function(x)
 {
-    mergeToTree(x$merge)
+    matrixToClusterTree(mergeToMatrix(x$merge),x$labels)
 }
 
 ## package kernlab
