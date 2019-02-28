@@ -7,16 +7,18 @@
 combineClusterings(clustering1, clustering2, ..., labels = NULL)
 }
 \arguments{
-\item{clustering1}{clustering result of method 1}
+\item{clustering1}{result of some clustering, for example output from hclust(). A clustering
+can also be an n by m  matrix, where n is the number of data points and m is the number
+of levels in the clustering hierarchy.}
 
-\item{clustering2}{clustering result of method 2}
+\item{clustering2}{result of a second clustering, to be combined with the first.}
 
-\item{...}{other clustering results}
+\item{...}{results of other clustering methods, to be combined with the first two.}
 
-\item{labels}{labels of data points in clustering methods}
+\item{labels}{labels of data points in clustering results}
 }
 \value{
-a clusterTree object, which is the final clustering result which combines 
+a clusterTree object, which is the final clustering result from combining
 all input clustering results
 }
 \description{
@@ -27,9 +29,9 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
               )
-clustering1<-stats::hclust(dist(data),method='single')
-clustering2<-kmeans(data,centers=3)
-clustering3<-dbscan::dbscan(data,eps=.1)
+clustering1 <- stats::hclust(dist(data),method='single')
+clustering2 <- kmeans(data,centers=3)
+clustering3 <- dbscan::dbscan(data,eps=.1)
 combineClusterings(clustering1,clustering2,clustering3)
 
 }

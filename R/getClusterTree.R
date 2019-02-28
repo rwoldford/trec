@@ -22,7 +22,17 @@ getClusterTree.clusterTree <- function(x) {
 #' @export
 getClusterTree.default <- function(x)
 {
-    stop("Not a clustering")
+  if(is.vector(x)) {
+    getClusterTree(matrix(x, ncol = 1))
+  } else stop("Not a clustering")
+}
+
+#' @export
+getClusterTree.factor <- function(x)
+{
+  if(is.numeric(x)) {
+    getClusterTree(matrix(x, ncol = 1))
+  } else stop("Not a clustering")
 }
 
 #' @export

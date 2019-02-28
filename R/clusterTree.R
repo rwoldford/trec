@@ -1,4 +1,9 @@
 matrixToClusterTree <- function(x, labels = NULL){
+  if (!is.matrix(x)) {
+    if (is.vector(x)) {
+      x <- matrix(x, ncol = 1)
+    } else stop("Argument must be a matrix or vector")
+  }
   colnames(x) <- paste("Level", 1:ncol(x))
   if (is.null(labels)) labels <- paste("object", 1:nrow(x))
   rownames(x) <- labels
@@ -122,20 +127,22 @@ mergeToMatrix <- function( merge ) {
 }
 
 #' This is a new ensemble method for combining multiple clustering outcomes
-#' @param clustering1 clustering result of method 1
-#' @param clustering2 clustering result of method 2
-#' @param ... other clustering results
-#' @param labels labels of data points in clustering methods
-#' @return a clusterTree object, which is the final clustering result which combines 
+#' @param clustering1 result of some clustering, for example output from hclust(). A clustering
+#' can also be an n by m  matrix, where n is the number of data points and m is the number
+#' of levels in the clustering hierarchy. 
+#' @param clustering2 result of a second clustering, to be combined with the first.
+#' @param ... results of other clustering methods, to be combined with the first two.
+#' @param labels labels of data points in clustering results
+#' @return a clusterTree object, which is the final clustering result from combining
 #' all input clustering results
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
 #'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
 #'               )
-#' clustering1<-stats::hclust(dist(data),method='single')
-#' clustering2<-kmeans(data,centers=3)
-#' clustering3<-dbscan::dbscan(data,eps=.1)
+#' clustering1 <- stats::hclust(dist(data),method='single')
+#' clustering2 <- kmeans(data,centers=3)
+#' clustering3 <- dbscan::dbscan(data,eps=.1)
 #' combineClusterings(clustering1,clustering2,clustering3)
 #' 
 #' @export
@@ -371,7 +378,9 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
 
 #' plot a clusterTree object
 #' @param x a clusterTree object
-#' @return ...remains to be processed
+#' @param y NULL.  Will be ignored with a warning if non-NULL
+#' @param ... remains to be processed
+#' @return No return value (invisible()) 
 #' @examples
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
@@ -383,12 +392,14 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
 #' res <- combineClusterings(clustering1,clustering2,clustering3)
 #' plot(res)
 #' @export 
-plot.clusterTree <- function(x){
+plot.clusterTree <- function(x, y = NULL, ...){
+  if (!is.null(y)) warning("argument y is ignored")
   order <- reOrderClusterTreeMatrix(x$tree)
   orderedTree <- x$tree[order,]
   graphics::plot.new()
   #plot(c(0,1),c(0,1))
-  res <- plotClusterTreeHelper(orderedTree,0,0,1,1)
+  plotClusterTreeHelper(orderedTree,0,0,1,1, ...)
+  invisible()
 }
 
 #' a helper function of plot.clusterTree
@@ -397,9 +408,11 @@ plot.clusterTree <- function(x){
 #' @param ybottom lower y coordinate of rectangular plot region
 #' @param xright left x coordinate of rectangular plot region
 #' @param ytop upper top coordinate of rectangular plot region
+#' @return Invisibly returns the coordinates of the bottom level rectangles, each as
+#'  (left bottom right top)
 #' @export
-plotClusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
-  n <- dim(x)[1]  
+plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop){
+  n <- dim(x)[1]   
   if(dim(x)[2]==1){
     start <- 1
     left <- .0
@@ -419,7 +432,6 @@ plotClusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
         xr <- xleft+left+(1-lambda)*(right-left)
         yt <- ybottom+(1-lambda)*(ytop-ybottom)
         graphics::rect(xl,yb,xr,yt)
-        print(c(xl,yb,xr,yt))
         res <- c(res,c(xl,yb,xr,yt))
         start <- jj
         left <- right
@@ -451,7 +463,8 @@ plotClusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
         yt <- ybottom+(1-lambda)*(ybottomupdate-ybottom)
         graphics::rect(xl,yb,xr,yt)
         res <- c(res,c(xl,yb,xr,yt))
-        rectangles <- plotClusterTreeHelper(as.matrix(x[start:(jj-1),2:dim(x)[2]]),xleft+left,ybottomupdate,xleft+right,ytop)
+        rectangles <- plotClusterTreeHelper(as.matrix(x[start:(jj-1),2:dim(x)[2]]),
+                                            xleft+left,ybottomupdate,xleft+right,ytop)
         if(length(rectangles)>=4){
           for (ii in 1:(length(rectangles)/4)) {
             graphics::segments((xl+xr)/2.,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2.,rectangles[ii*4-2])
@@ -464,7 +477,7 @@ plotClusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
         break
       }
     }
-    res
+    invisible(res)
   }
 }
 

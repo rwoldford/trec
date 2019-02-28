@@ -4,7 +4,7 @@
 \alias{plot.clusterTree}
 \title{plot a clusterTree object}
 \usage{
-\method{plot}{clusterTree}(x)
+\method{plot}{clusterTree}(x, y = NULL, ...)
 }
 \arguments{
 \item{x}{a clusterTree object}
