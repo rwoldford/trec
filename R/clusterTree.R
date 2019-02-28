@@ -332,6 +332,11 @@ getClusteringDistance <- function(clustering1, clustering2)
   sqrt(sum((w1-w2)^2))
 }
 
+#' reorder rows of tree attribute of clusterTree object
+#' @param x is the tree attribute of clusterTree object
+#' @param labels labels is the order of rows of x
+#' @return an order which simplies the process of plotting dendogram/density plot
+#' @export
 reOrderClusterTreeMatrix <- function(x,labels=NULL)
 {
   n <- dim(x)[1]
@@ -364,15 +369,36 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
   }
 }
 
+#' plot a clusterTree object
+#' @param x a clusterTree object
+#' @return ...remains to be processed
+#' @examples
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' clustering1<-stats::hclust(dist(data),method='single')
+#' clustering2<-kmeans(data,centers=3)
+#' clustering3<-dbscan::dbscan(data,eps=.1)
+#' res <- combineClusterings(clustering1,clustering2,clustering3)
+#' plot(res)
+#' @export 
 plot.clusterTree <- function(x){
   order <- reOrderClusterTreeMatrix(x$tree)
   orderedTree <- x$tree[order,]
-  plot.new()
+  graphics::plot.new()
   #plot(c(0,1),c(0,1))
-  plot.clusterTreeHelper(orderedTree,0,0,1,1)
+  res <- plotClusterTreeHelper(orderedTree,0,0,1,1)
 }
 
-plot.clusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
+#' a helper function of plot.clusterTree
+#' @param x a matrix which is tree attribute of clusterTree object
+#' @param xleft left x coordinate of rectangular plot region
+#' @param ybottom lower y coordinate of rectangular plot region
+#' @param xright left x coordinate of rectangular plot region
+#' @param ytop upper top coordinate of rectangular plot region
+#' @export
+plotClusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
   n <- dim(x)[1]  
   if(dim(x)[2]==1){
     start <- 1
@@ -392,7 +418,7 @@ plot.clusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
         yb <- ybottom+lambda*(ytop-ybottom)
         xr <- xleft+left+(1-lambda)*(right-left)
         yt <- ybottom+(1-lambda)*(ytop-ybottom)
-        rect(xl,yb,xr,yt)
+        graphics::rect(xl,yb,xr,yt)
         print(c(xl,yb,xr,yt))
         res <- c(res,c(xl,yb,xr,yt))
         start <- jj
@@ -423,19 +449,12 @@ plot.clusterTreeHelper <- function(x,xleft,ybottom,xright,ytop){
         yb <- ybottom+lambda*(ybottomupdate-ybottom)
         xr <- xleft+left+(1-lambda)*(right-left)
         yt <- ybottom+(1-lambda)*(ybottomupdate-ybottom)
-        rect(xl,yb,xr,yt)
+        graphics::rect(xl,yb,xr,yt)
         res <- c(res,c(xl,yb,xr,yt))
-        #rect(xleft+left,ybottom,xleft+right,ybottomupdate)
-        rectangles <- plot.clusterTreeHelper(as.matrix(x[start:(jj-1),2:dim(x)[2]]),xleft+left,ybottomupdate,xleft+right,ytop)
+        rectangles <- plotClusterTreeHelper(as.matrix(x[start:(jj-1),2:dim(x)[2]]),xleft+left,ybottomupdate,xleft+right,ytop)
         if(length(rectangles)>=4){
-          #print('rectangles= ')
-          #print(rectangles)
           for (ii in 1:(length(rectangles)/4)) {
-            #print(ii)
-            #print('lower')
-            #print(c(xl,yb,xr,yt))
-            #print(c((xl+xr)/2,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2,rectangles[ii*4-2]))
-            segments((xl+xr)/2.,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2.,rectangles[ii*4-2])
+            graphics::segments((xl+xr)/2.,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2.,rectangles[ii*4-2])
           }
         }
         start <- jj
