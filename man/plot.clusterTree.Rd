@@ -4,13 +4,37 @@
 \alias{plot.clusterTree}
 \title{plot a clusterTree object}
 \usage{
-\method{plot}{clusterTree}(x, y = NULL, ...)
+\method{plot}{clusterTree}(x, y = NULL, labels = NULL, axes = TRUE,
+  frame.plot = FALSE, ann = TRUE, main = "Cluster Tree Density Plot",
+  sub = NULL, xlab = NULL, ylab = "Height", col = NULL, ...)
 }
 \arguments{
 \item{x}{a clusterTree object}
+
+\item{y}{NULL.  Will be ignored with a warning if non-NULL}
+
+\item{labels}{labels for each data point}
+
+\item{axes}{whether to plot axis on the left}
+
+\item{frame.plot}{whether to plot frame for density plot}
+
+\item{ann}{whether to annotate main, sub, xlab, ylab}
+
+\item{main}{main title for the plot}
+
+\item{sub}{subtitle for the plot}
+
+\item{xlab}{label for x-axis}
+
+\item{ylab}{label for y-axis}
+
+\item{col}{color of rectangle}
+
+\item{...}{remains to be processed}
 }
 \value{
-...remains to be processed
+No return value (invisible())
 }
 \description{
 plot a clusterTree object

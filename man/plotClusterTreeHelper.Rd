@@ -4,7 +4,7 @@
 \alias{plotClusterTreeHelper}
 \title{a helper function of plot.clusterTree}
 \usage{
-plotClusterTreeHelper(x, xleft, ybottom, xright, ytop)
+plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, labels, col)
 }
 \arguments{
 \item{x}{a matrix which is tree attribute of clusterTree object}
@@ -16,6 +16,14 @@ plotClusterTreeHelper(x, xleft, ybottom, xright, ytop)
 \item{xright}{left x coordinate of rectangular plot region}
 
 \item{ytop}{upper top coordinate of rectangular plot region}
+
+\item{labels}{labels for the plot}
+
+\item{col}{color of rectangle}
+}
+\value{
+Invisibly returns the coordinates of the bottom level rectangles, each as
+ (left bottom right top)
 }
 \description{
 a helper function of plot.clusterTree
