@@ -4,7 +4,8 @@
 \alias{plotClusterTreeHelper}
 \title{a helper function of plot.clusterTree}
 \usage{
-plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, labels, col)
+plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, plot.labels, labels,
+  col)
 }
 \arguments{
 \item{x}{a matrix which is tree attribute of clusterTree object}
@@ -16,6 +17,8 @@ plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, labels, col)
 \item{xright}{left x coordinate of rectangular plot region}
 
 \item{ytop}{upper top coordinate of rectangular plot region}
+
+\item{plot.labels}{whether to plot labels}
 
 \item{labels}{labels for the plot}
 

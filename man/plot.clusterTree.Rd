@@ -4,14 +4,17 @@
 \alias{plot.clusterTree}
 \title{plot a clusterTree object}
 \usage{
-\method{plot}{clusterTree}(x, y = NULL, labels = NULL, axes = TRUE,
-  frame.plot = FALSE, ann = TRUE, main = "Cluster Tree Density Plot",
-  sub = NULL, xlab = NULL, ylab = "Height", col = NULL, ...)
+\method{plot}{clusterTree}(x, y = NULL, plot.labels = FALSE,
+  labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE,
+  main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL,
+  ylab = "Height", col = NULL, ...)
 }
 \arguments{
 \item{x}{a clusterTree object}
 
 \item{y}{NULL.  Will be ignored with a warning if non-NULL}
+
+\item{plot.labels}{whether to plot labels}
 
 \item{labels}{labels for each data point}
 

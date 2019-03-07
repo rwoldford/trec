@@ -379,6 +379,7 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
 #' plot a clusterTree object
 #' @param x a clusterTree object
 #' @param y NULL.  Will be ignored with a warning if non-NULL
+#' @param plot.labels whether to plot labels
 #' @param labels labels for each data point
 #' @param axes whether to plot axis on the left
 #' @param frame.plot whether to plot frame for density plot
@@ -433,6 +434,7 @@ plot.clusterTree <- function(x, y = NULL, plot.labels = FALSE, labels = NULL, ax
 #' @param ybottom lower y coordinate of rectangular plot region
 #' @param xright left x coordinate of rectangular plot region
 #' @param ytop upper top coordinate of rectangular plot region
+#' @param plot.labels whether to plot labels
 #' @param labels labels for the plot
 #' @param col color of rectangle
 #' @return Invisibly returns the coordinates of the bottom level rectangles, each as
