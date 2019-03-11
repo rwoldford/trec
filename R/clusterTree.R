@@ -6,6 +6,8 @@ matrixToClusterTree <- function(x, labels = NULL){
   }
   colnames(x) <- paste("Level", 1:ncol(x))
   if (is.null(labels)) labels <- paste("object", 1:nrow(x))
+  if (length(labels)!=nrow(x))
+    stop("length of labels and rows of matrix do not match!")
   rownames(x) <- labels
   ###############################
   mapZerosToNA <- function(x){
@@ -161,23 +163,6 @@ combineClusterings <- function(clustering1, clustering2,
     clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
   }
   clustering[is.na(clustering)] <- 0
-  # clustering sum of multiple clustering outcomes
-  #clusteringsum <- array(0,dim = c(n,n))
-  #for(j in 1:n)
-  #{
-  #  for(k in 1:j)
-  #  {
-  #    clusteringsum[j,k] <- sum((clustering[j,]!=0)&
-  #                                (clustering[k,]!=0)&
-  #                                (clustering[j,]==clustering[k,]))
-  #  }
-  #}
-  
-  ## use single linkage method to produce result for trec
-  #distance <- stats::as.dist(clusteringsum)
-  #singlelinkage <- stats::hclust(-distance, method = "single")
-  #merge <- singlelinkage$merge
-  #height <- singlelinkage$height
   
   clusteringsum <- array(0,dim = c(n,n))
   for(j in 2:n)
@@ -346,6 +331,8 @@ getClusteringDistance <- function(clustering1, clustering2)
 #' @export
 reOrderClusterTreeMatrix <- function(x,labels=NULL)
 {
+  if(!is.matrix(x))
+    stop('input must be a matrix!')
   n <- dim(x)[1]
   if(is.null(labels)){ labels <- c(1:n) }
   if(!is.vector(labels)){ stop("labels are not a vector!") }
@@ -415,6 +402,7 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
   if(is.null(col))
     col <- 'grey'
   
+  labels.plot <- FALSE
   if(is.logical(labels)){
     labels.plot <- labels
     labels <- x$labels
@@ -430,7 +418,6 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
           stop('length of labels and rows of clusterTree object does not match!')
         }else{
           labels.plot <- TRUE
-          labels <- x$labels
         }
       }
     }
