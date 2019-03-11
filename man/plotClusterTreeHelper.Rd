@@ -4,7 +4,7 @@
 \alias{plotClusterTreeHelper}
 \title{a helper function of plot.clusterTree}
 \usage{
-plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, plot.labels, labels,
+plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, labels.plot, labels,
   col)
 }
 \arguments{
@@ -18,7 +18,7 @@ plotClusterTreeHelper(x, xleft, ybottom, xright, ytop, plot.labels, labels,
 
 \item{ytop}{upper top coordinate of rectangular plot region}
 
-\item{plot.labels}{whether to plot labels}
+\item{labels.plot}{whether to plot labels}
 
 \item{labels}{labels for the plot}
 
