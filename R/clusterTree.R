@@ -1,15 +1,19 @@
+# transfrom a matrix into a clusterTree class object
 matrixToClusterTree <- function(x, labels = NULL){
   if (!is.matrix(x)) {
+    # transform a vector if it is not a matrix
     if (is.vector(x)) {
       x <- matrix(x, ncol = 1)
     } else stop("Argument must be a matrix or vector")
   }
+  # assign column names and row names to this matrix
   colnames(x) <- paste("Level", 1:ncol(x))
   if (is.null(labels)) labels <- paste("object", 1:nrow(x))
   if (length(labels)!=nrow(x))
     stop("length of labels and rows of matrix do not match!")
   rownames(x) <- labels
   ###############################
+  # map all zeros to NA
   mapZerosToNA <- function(x){
     for (i in 1:length(x)) {
       if(x[i]==0){
@@ -155,7 +159,7 @@ combineClusterings <- function(clustering1, clustering2,
   clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
   
   # n is number of data points
-  n <- dim(clusterTrees[[1]]$tree)[1]
+  n <- nrow(clusterTrees[[1]]$tree)
   # combine clusterTrees
   clustering<-clusterTrees[[1]]$tree
   for(i in 2:length(clusterTrees))
@@ -402,6 +406,8 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
   if(is.null(col))
     col <- 'grey'
   
+  # process variable labels
+  # processing accordingly with boolean input and vector input
   labels.plot <- FALSE
   if(is.logical(labels)){
     labels.plot <- labels
@@ -423,6 +429,7 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
     }
   }
   ##############################################################
+  # plot clusterTree recursively
   plotClusterTreeHelper(x = orderedTree, xleft = 0, ybottom = 0, xright = 1, ytop = 1, labels.plot = labels.plot, labels = labels[order], col = col, ...)
   if(frame.plot){
     graphics::box(...)
@@ -438,6 +445,7 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
 }
 
 #' a helper function of plot.clusterTree
+#' this function plot clusterTree object recursively
 #' @param x a matrix which is tree attribute of clusterTree object
 #' @param xleft left x coordinate of rectangular plot region
 #' @param ybottom lower y coordinate of rectangular plot region
