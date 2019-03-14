@@ -12,7 +12,7 @@ matrixToClusterTree <- function(x, labels = NULL){
   if (length(labels)!=nrow(x))
     stop("length of labels and rows of matrix do not match!")
   rownames(x) <- labels
-  ###############################
+  ####
   # map all zeros to NA
   mapZerosToNA <- function(x){
     for (i in 1:length(x)) {
@@ -29,7 +29,8 @@ matrixToClusterTree <- function(x, labels = NULL){
   else{
     x <- t(apply(x, 1, mapZerosToNA))
   }
-  ###############################
+  ####
+  ####
   tree <- list(tree = x, labels = labels)
   class(tree) <- c("clusterTree", class(tree))
   tree
@@ -132,7 +133,8 @@ mergeToMatrix <- function( merge ) {
   branchComponentFamily
 }
 
-#' This is a new ensemble method for combining multiple clustering outcomes
+#' An ensemble method for combining multiple clustering outcomes based
+#' on monotonic graph families of Zhou and Oldford
 #' @param clustering1 result of some clustering, for example output from hclust(). A clustering
 #' can also be an n by m  matrix, where n is the number of data points and m is the number
 #' of levels in the clustering hierarchy. 
@@ -275,59 +277,6 @@ combineClusterings <- function(clustering1, clustering2,
 }
 
 
-#' Calculate distance of two hierarchical clustering matrix
-#' @param clustering1 The first clustering as a branch component
-#' @param clustering2 The second clustering as a branch component
-#' @return distance between 0 and square root of 2
-#' @examples
-#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
-#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
-#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
-#'               )
-#' clust1 <- stats::hclust(dist(data),method='complete')
-#' clust2 <- stats::hclust(dist(data),method='single')
-#' getClusteringDistance(clust1,clust2)
-#' @export
-#' 
-getClusteringDistance <- function(clustering1, clustering2)
-{
-  branchComponent1 <- getClusterTree(clustering1)$tree
-  branchComponent2 <- getClusterTree(clustering2)$tree
-  branchComponent1[is.na(branchComponent1)] <- 0
-  branchComponent2[is.na(branchComponent2)] <- 0
-  n <- nrow(branchComponent1)
-  w1 <- vector(mode = 'integer', length = n*(n-1)/2)
-  for(j in 2:n)
-  {
-    for(k in 1:(j-1))
-    {
-      w1[(j-1)*(j-2)/2+k] <- sum((branchComponent1[j,]!=0)&
-                                   (branchComponent1[k,]!=0)&
-                                   (branchComponent1[j,]==branchComponent1[k,]))
-    }
-  }
-  w2 <- vector(mode = 'integer', length = n*(n-1)/2)
-  for(j in 2:n)
-  {
-    for(k in 1:(j-1))
-    {
-      w2[(j-1)*(j-2)/2+k] <- sum((branchComponent2[j,]!=0)&
-                                   (branchComponent2[k,]!=0)&
-                                   (branchComponent2[j,]==branchComponent2[k,]))
-    }
-  }
-  #w1<- w1 - 1
-  if (sum(w1^2) > 0) {
-    w1 <- w1/sqrt(sum(w1^2))
-  }
-  
-  #w2 <- w2 - 1
-  if (sum(w2^2) > 0) {
-    w2 <- w2/sqrt(sum(w2^2))
-  }
-  sqrt(sum((w1-w2)^2))
-}
-
 #' reorder rows of tree attribute of clusterTree object
 #' @param x is the tree attribute of clusterTree object
 #' @param labels labels is the order of rows of x
@@ -364,171 +313,6 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
     }
     res <- c(res,labels[is.na(x[,1])])
     res
-  }
-}
-
-#' plot a clusterTree object
-#' @param x a clusterTree object
-#' @param y NULL.  Will be ignored with a warning if non-NULL
-#' @param labels labels for each data point
-#' @param axes whether to plot axis on the left
-#' @param frame.plot whether to plot frame for density plot
-#' @param ann whether to annotate main, sub, xlab, ylab
-#' @param main main title for the plot
-#' @param sub subtitle for the plot
-#' @param xlab label for x-axis
-#' @param ylab label for y-axis
-#' @param col color of rectangle
-#' @param ... remains to be processed
-#' @return No return value (invisible()) 
-#' @examples
-#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
-#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
-#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
-#'               )
-#' clustering1<-stats::hclust(dist(data),method='single')
-#' clustering2<-kmeans(data,centers=3)
-#' clustering3<-dbscan::dbscan(data,eps=.1)
-#' res <- combineClusterings(clustering1,clustering2,clustering3)
-#' plot(res)
-#' @export 
-plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
-  main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL, ylab = "Height", col = NULL, ...){
-  if (!is.null(y)) warning("argument y is ignored")
-  ##############################################################
-  # gather what we need for clusterTree object and introduce to plotClusterTreeHelper function
-  order <- reOrderClusterTreeMatrix(x$tree)
-  orderedTree <- as.matrix(x$tree[order,])
-  graphics::plot.new()
-  height <- as.double(dim(x$tree)[2])
-  ##############################################################
-  # variable checking
-  if(is.null(col))
-    col <- 'grey'
-  
-  # process variable labels
-  # processing accordingly with boolean input and vector input
-  labels.plot <- FALSE
-  if(is.logical(labels)){
-    labels.plot <- labels
-    labels <- x$labels
-  }else{
-    if(is.null(labels)){
-      labels.plot <- FALSE
-      labels <- x$labels
-    }else{
-      if(!is.vector(labels)){
-        stop("labels must be a logical or vector!")
-      }else{
-        if(length(labels) != nrow(x$tree)){
-          stop('length of labels and rows of clusterTree object does not match!')
-        }else{
-          labels.plot <- TRUE
-        }
-      }
-    }
-  }
-  ##############################################################
-  # plot clusterTree recursively
-  plotClusterTreeHelper(x = orderedTree, xleft = 0, ybottom = 0, xright = 1, ytop = 1, labels.plot = labels.plot, labels = labels[order], col = col, ...)
-  if(frame.plot){
-    graphics::box(...)
-  }
-  if(ann){
-    if(is.null(sub))
-      sub <- "density plot"
-    graphics::title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...)
-  }
-  if(axes)
-    graphics::axis(2,(1/2/height)*seq(1,2*height,by = 2),labels = c(1:height))
-  invisible()
-}
-
-#' a helper function of plot.clusterTree
-#' this function plot clusterTree object recursively
-#' @param x a matrix which is tree attribute of clusterTree object
-#' @param xleft left x coordinate of rectangular plot region
-#' @param ybottom lower y coordinate of rectangular plot region
-#' @param xright left x coordinate of rectangular plot region
-#' @param ytop upper top coordinate of rectangular plot region
-#' @param labels.plot whether to plot labels
-#' @param labels labels for the plot
-#' @param col color of rectangle
-#' @return Invisibly returns the coordinates of the bottom level rectangles, each as
-#'  (left bottom right top)
-#' @export
-plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop, labels.plot, labels, col){
-  n <- dim(x)[1]   
-  if(dim(x)[2]==1){
-    start <- 1
-    left <- .0
-    res <- c()
-    while(start <= n){
-      if(!is.na(x[start,1])){
-        jj <- start
-        while (!is.na(x[jj,1]) & x[jj,1]==x[start,1]) {
-          if(jj<n){ jj <- jj+1 }
-          else{ break }
-        }
-        if(jj==n){ jj <- jj+1 }
-        right <- left + (jj-start)/n*(xright - xleft)
-        lambda <- .2
-        xl <- xleft+left+lambda*(right-left)
-        yb <- ybottom+lambda*(ytop-ybottom)
-        xr <- xleft+left+(1-lambda)*(right-left)
-        yt <- ybottom+(1-lambda)*(ytop-ybottom)
-        graphics::rect(xl,yb,xr,yt,col = col)
-        if(labels.plot)
-          graphics::text(seq(from = xl, to = xr, length.out = jj-start), rep((yb+ybottom)/2, jj-start), labels = labels[start:(jj-1)],cex = 10*(yb-ybottom), srt = 90)
-        res <- c(res,c(xl,yb,xr,yt))
-        start <- jj
-        left <- right
-      }
-      else{
-        break
-      }
-    }
-    res
-  }
-  else{
-    start <- 1
-    left <- .0
-    res <- c()
-    while (start <= n) {
-      if(!is.na(x[start,1])){
-        jj <- start
-        while(!is.na(x[jj,1]) & x[jj,1]==x[start,1]){
-          if(jj<n){ jj <- jj+1 }
-          else{ break }
-        }
-        if(jj==n){ jj <- jj+1 }
-        right <- left + (jj-start)/n*(xright - xleft)
-        ybottomupdate <- ybottom + (ytop-ybottom)/dim(x)[2]
-        lambda <- .2
-        xl <- xleft+left+lambda*(right-left)
-        yb <- ybottom+lambda*(ybottomupdate-ybottom)
-        xr <- xleft+left+(1-lambda)*(right-left)
-        yt <- ybottom+(1-lambda)*(ybottomupdate-ybottom)
-        graphics::rect(xl,yb,xr,yt,col = col)
-        if(labels.plot)
-          graphics::text(seq(from = xl, to = xr, length.out = jj-start), rep((yb+ybottom)/2, jj-start), labels = labels[start:(jj-1)],cex = 10*(yb-ybottom), srt = 90)
-        res <- c(res,c(xl,yb,xr,yt))
-        rectangles <- plotClusterTreeHelper(x = as.matrix(x[start:(jj-1),2:dim(x)[2]]),
-                                            xleft = xleft+left, ybottom = ybottomupdate, xright = xleft+right, 
-          ytop = ytop, labels.plot = labels.plot, labels = labels[start:(jj-1)],col = col)
-        if(length(rectangles)>=4){
-          for (ii in 1:(length(rectangles)/4)) {
-            graphics::segments((xl+xr)/2.,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2.,rectangles[ii*4-2])
-          }
-        }
-        start <- jj
-        left <- right
-      }
-      else{
-        break
-      }
-    }
-    invisible(res)
   }
 }
 
