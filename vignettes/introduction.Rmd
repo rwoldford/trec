@@ -25,7 +25,9 @@ library(dbscan)
 cl3<-dbscan(data,eps = .2)
 # call combineClusterings function
 final_cluster_result <- combineClusterings(cl1,cl2,cl3)
+plot(final_cluster_result)
 ```
+
 From sample code, we can see there are four steps to use TREC:
 
 1. load/generate your data
@@ -51,6 +53,7 @@ library(mclust)
 cl3<-Mclust(data,eps = .2)
 # call TREC function
 final_cluster_result <- combineClusterings(cl1,cl2,cl3)
+plot(final_cluster_result)
 ```
 
 

@@ -1,13 +1,19 @@
+# transfrom a matrix into a clusterTree class object
 matrixToClusterTree <- function(x, labels = NULL){
   if (!is.matrix(x)) {
+    # transform a vector if it is not a matrix
     if (is.vector(x)) {
       x <- matrix(x, ncol = 1)
     } else stop("Argument must be a matrix or vector")
   }
+  # assign column names and row names to this matrix
   colnames(x) <- paste("Level", 1:ncol(x))
   if (is.null(labels)) labels <- paste("object", 1:nrow(x))
+  if (length(labels)!=nrow(x))
+    stop("length of labels and rows of matrix do not match!")
   rownames(x) <- labels
   ###############################
+  # map all zeros to NA
   mapZerosToNA <- function(x){
     for (i in 1:length(x)) {
       if(x[i]==0){
@@ -153,7 +159,7 @@ combineClusterings <- function(clustering1, clustering2,
   clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
   
   # n is number of data points
-  n <- dim(clusterTrees[[1]]$tree)[1]
+  n <- nrow(clusterTrees[[1]]$tree)
   # combine clusterTrees
   clustering<-clusterTrees[[1]]$tree
   for(i in 2:length(clusterTrees))
@@ -161,23 +167,6 @@ combineClusterings <- function(clustering1, clustering2,
     clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
   }
   clustering[is.na(clustering)] <- 0
-  # clustering sum of multiple clustering outcomes
-  #clusteringsum <- array(0,dim = c(n,n))
-  #for(j in 1:n)
-  #{
-  #  for(k in 1:j)
-  #  {
-  #    clusteringsum[j,k] <- sum((clustering[j,]!=0)&
-  #                                (clustering[k,]!=0)&
-  #                                (clustering[j,]==clustering[k,]))
-  #  }
-  #}
-  
-  ## use single linkage method to produce result for trec
-  #distance <- stats::as.dist(clusteringsum)
-  #singlelinkage <- stats::hclust(-distance, method = "single")
-  #merge <- singlelinkage$merge
-  #height <- singlelinkage$height
   
   clusteringsum <- array(0,dim = c(n,n))
   for(j in 2:n)
@@ -346,6 +335,8 @@ getClusteringDistance <- function(clustering1, clustering2)
 #' @export
 reOrderClusterTreeMatrix <- function(x,labels=NULL)
 {
+  if(!is.matrix(x))
+    stop('input must be a matrix!')
   n <- dim(x)[1]
   if(is.null(labels)){ labels <- c(1:n) }
   if(!is.vector(labels)){ stop("labels are not a vector!") }
@@ -379,7 +370,6 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
 #' plot a clusterTree object
 #' @param x a clusterTree object
 #' @param y NULL.  Will be ignored with a warning if non-NULL
-#' @param plot.labels whether to plot labels
 #' @param labels labels for each data point
 #' @param axes whether to plot axis on the left
 #' @param frame.plot whether to plot frame for density plot
@@ -402,19 +392,45 @@ reOrderClusterTreeMatrix <- function(x,labels=NULL)
 #' res <- combineClusterings(clustering1,clustering2,clustering3)
 #' plot(res)
 #' @export 
-plot.clusterTree <- function(x, y = NULL, plot.labels = FALSE, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
+plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
   main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL, ylab = "Height", col = NULL, ...){
   if (!is.null(y)) warning("argument y is ignored")
+  ##############################################################
+  # gather what we need for clusterTree object and introduce to plotClusterTreeHelper function
   order <- reOrderClusterTreeMatrix(x$tree)
   orderedTree <- as.matrix(x$tree[order,])
   graphics::plot.new()
-  #plot(c(0,1),c(0,1))
   height <- as.double(dim(x$tree)[2])
+  ##############################################################
+  # variable checking
   if(is.null(col))
     col <- 'grey'
-  if(is.null(labels))
+  
+  # process variable labels
+  # processing accordingly with boolean input and vector input
+  labels.plot <- FALSE
+  if(is.logical(labels)){
+    labels.plot <- labels
     labels <- x$labels
-  plotClusterTreeHelper(orderedTree,0,0,1,1, plot.labels, labels[order], col, ...)
+  }else{
+    if(is.null(labels)){
+      labels.plot <- FALSE
+      labels <- x$labels
+    }else{
+      if(!is.vector(labels)){
+        stop("labels must be a logical or vector!")
+      }else{
+        if(length(labels) != nrow(x$tree)){
+          stop('length of labels and rows of clusterTree object does not match!')
+        }else{
+          labels.plot <- TRUE
+        }
+      }
+    }
+  }
+  ##############################################################
+  # plot clusterTree recursively
+  plotClusterTreeHelper(x = orderedTree, xleft = 0, ybottom = 0, xright = 1, ytop = 1, labels.plot = labels.plot, labels = labels[order], col = col, ...)
   if(frame.plot){
     graphics::box(...)
   }
@@ -429,18 +445,19 @@ plot.clusterTree <- function(x, y = NULL, plot.labels = FALSE, labels = NULL, ax
 }
 
 #' a helper function of plot.clusterTree
+#' this function plot clusterTree object recursively
 #' @param x a matrix which is tree attribute of clusterTree object
 #' @param xleft left x coordinate of rectangular plot region
 #' @param ybottom lower y coordinate of rectangular plot region
 #' @param xright left x coordinate of rectangular plot region
 #' @param ytop upper top coordinate of rectangular plot region
-#' @param plot.labels whether to plot labels
+#' @param labels.plot whether to plot labels
 #' @param labels labels for the plot
 #' @param col color of rectangle
 #' @return Invisibly returns the coordinates of the bottom level rectangles, each as
 #'  (left bottom right top)
 #' @export
-plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop, plot.labels, labels, col){
+plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop, labels.plot, labels, col){
   n <- dim(x)[1]   
   if(dim(x)[2]==1){
     start <- 1
@@ -461,7 +478,7 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop, plot.labels, 
         xr <- xleft+left+(1-lambda)*(right-left)
         yt <- ybottom+(1-lambda)*(ytop-ybottom)
         graphics::rect(xl,yb,xr,yt,col = col)
-        if(plot.labels)
+        if(labels.plot)
           graphics::text(seq(from = xl, to = xr, length.out = jj-start), rep((yb+ybottom)/2, jj-start), labels = labels[start:(jj-1)],cex = 10*(yb-ybottom), srt = 90)
         res <- c(res,c(xl,yb,xr,yt))
         start <- jj
@@ -493,11 +510,12 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop, plot.labels, 
         xr <- xleft+left+(1-lambda)*(right-left)
         yt <- ybottom+(1-lambda)*(ybottomupdate-ybottom)
         graphics::rect(xl,yb,xr,yt,col = col)
-        if(plot.labels)
+        if(labels.plot)
           graphics::text(seq(from = xl, to = xr, length.out = jj-start), rep((yb+ybottom)/2, jj-start), labels = labels[start:(jj-1)],cex = 10*(yb-ybottom), srt = 90)
         res <- c(res,c(xl,yb,xr,yt))
-        rectangles <- plotClusterTreeHelper(as.matrix(x[start:(jj-1),2:dim(x)[2]]),
-                                            xleft+left,ybottomupdate,xleft+right,ytop, plot.labels, labels[start:(jj-1)],col = col)
+        rectangles <- plotClusterTreeHelper(x = as.matrix(x[start:(jj-1),2:dim(x)[2]]),
+                                            xleft = xleft+left, ybottom = ybottomupdate, xright = xleft+right, 
+          ytop = ytop, labels.plot = labels.plot, labels = labels[start:(jj-1)],col = col)
         if(length(rectangles)>=4){
           for (ii in 1:(length(rectangles)/4)) {
             graphics::segments((xl+xr)/2.,yt,(rectangles[ii*4-3]+rectangles[ii*4-1])/2.,rectangles[ii*4-2])

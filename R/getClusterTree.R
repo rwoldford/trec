@@ -227,6 +227,13 @@ getClusterTree.dbscan_fast <- function(x)
     tree
 }
 
+
+## densityClust package ##
+#' @export
+getClusterTree.densityCluster <- function(x){
+  tree <- matrixToClusterTree(x$clusters)
+}
+
 ## Fclust package  ##
 #' @export
 getClusterTree.fclust <- function(x)
