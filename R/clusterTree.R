@@ -55,12 +55,17 @@ matrixToClusterTree <- function(x, labels = NULL){
 #' @export
 mergeToMatrix <- function( merge ) {
   
-  # m is number of points
+  # m is number of points minus one
+  # n is number of points
   m <- dim(merge)[1]
   n <- m + 1
   
+  # verticeSets record data points in each cluster by
+  # decoding input merge
   verticesSets <- array(0,dim=c(m,n))
+  # assign clusterId based on verticeSets
   componentSets <- array(0,dim=c(m,n))
+  # record which layer each data point belongs to 
   layerSet <- array(0,dim=c(m,1))
   
   # get the coorresponding vertices set for each row in merge

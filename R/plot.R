@@ -199,3 +199,117 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop,
     invisible(res)
   }
 }
+
+clusterTreeToClusterTreeDensityPlot <- function(x){
+  order <- reOrderClusterTreeMatrix(x$tree)
+  orderedTree <- as.matrix(x$tree[order,])
+  labels <- c(1:nrow(x$tree))
+  labels <- labels[order]
+  res <- clusterTreeToClusterTreeDensityPlotHelper(x = orderedTree, xleft = 0, ybottom = 0, 
+    xright = 1, ytop = 1, labels = labels)
+  class(res) <- c("clusterTreeDensityPlot", class(res))
+  res
+}
+
+clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright, ytop, labels){
+  n <- nrow(x)    
+  if(ncol(x)==1){
+    start <- 1
+    left <- .0
+    rectangles <- list()
+    labels <- list()
+    lines <- list()
+    is.runts <- list()
+    subtree <- list()
+    while(start <= n){
+        jj <- start
+        while ((!is.na(x[start,1]) & !is.na(x[jj,1]) & x[jj,1]==x[start,1]) | (is.na(x[start,1]) & is.na(x[jj,1]))) {
+          if(jj<n){ jj <- jj+1 }
+          else{ break }
+        }
+        if(jj==n){ jj <- jj+1 }
+        right <- left + (jj-start)/n*(xright - xleft)
+        lambda <- .2
+        xl <- xleft+left+lambda*(right-left)
+        yb <- ybottom+lambda*(ytop-ybottom)
+        xr <- xleft+left+(1-lambda)*(right-left)
+        yt <- ybottom+(1-lambda)*(ytop-ybottom)
+        rectangles[[length(rectangles)+1]] <- list(xleft = xl, ybottom = yb, xright = xr, ytop = yt)
+        labels_x <- seq(from = xl, to = xr, length.out = jj-start) 
+        labels_y <- (yb+ybottom)/2 
+        labels_text <- labels[start:(jj-1)]
+        labels_tmp <- list()
+        for (kk in c(1:(jj-start))) {
+          labels_tmp[[kk]] <- list(x=labels_x[kk], y=labels_y, text = labels_text[kk])
+        }
+        labels[[length(labels)+1]] <- labels_tmp
+        lines[[length(lines)+1]] <- list()
+        is.runts[[length(is.runts)+1]] <- is.na(x[start,1])
+        start <- jj
+        left <- right
+      }
+    list(tree = x, rectangles = rectangles, labels = labels, lines = lines, 
+      is.runts = is.runts, subtree = subtree, n_branches = length(rectangles))
+  }
+  else{
+    start <- 1
+    left <- .0
+    rectangles <- list()
+    labels <- list()
+    lines <- list()
+    is.runts <- list()
+    subtree <- list()
+    while (start <= n) {
+        jj <- start
+        while((!is.na(x[start,1]) & !is.na(x[jj,1]) & x[jj,1]==x[start,1]) | (is.na(x[start,1]) & is.na(x[jj,1]))){
+          if(jj<n){ jj <- jj+1 }
+          else{ break }
+        }
+        if(jj==n){ jj <- jj+1 }
+        right <- left + (jj-start)/n*(xright - xleft)
+        ybottomupdate <- ybottom + (ytop-ybottom)/dim(x)[2]
+        lambda <- .2
+        xl <- xleft+left+lambda*(right-left)
+        yb <- ybottom+lambda*(ybottomupdate-ybottom)
+        xr <- xleft+left+(1-lambda)*(right-left)
+        yt <- ybottom+(1-lambda)*(ybottomupdate-ybottom)
+        rectangles[[length(rectangles)+1]] <- list(xleft = xl, ybottom = yb, xright = xr, ytop = yt)
+        labels_x <- seq(from = xl, to = xr, length.out = jj-start) 
+        labels_y <- (yb+ybottom)/2 
+        labels_text <- labels[start:(jj-1)]
+        labels_tmp <- list()
+        for (kk in c(1:(jj-start))) {
+          labels_tmp[[kk]] <- list(x=labels_x[kk], y=labels_y, text = labels_text[kk])
+        }
+        labels[[length(labels)+1]] <- labels_tmp
+        subtree_tmp <- clusterTreeToClusterTreeDensityPlotHelper(x = as.matrix(x[start:(jj-1),2:dim(x)[2]]),
+                                            xleft = xleft+left, 
+                                            ybottom = ybottomupdate, 
+                                            xright = xleft+right, 
+                                            ytop = ytop, 
+                                            labels = labels[start:(jj-1)])
+        subtree[[length(subtree)+1]] <- subtree_tmp
+        lines_tmp <- list()
+        rectangle_tmp <- subtree_tmp$rectangles
+        for (kk in 1:length(rectangle_tmp)) {
+          cur_rectangle <- rectangle_tmp[[kk]]
+          lines_tmp[[length(lines_tmp)+1]] <- list(start = list(x = (xl+xr)/2.0, y = yt), end = list(x = (cur_rectangle$xleft + cur_rectangle$xright)/2.0), y = cur_rectangle$ybottom)
+        }
+        lines[[length(lines)+1]] <- lines_tmp
+        is.runts[[length(is.runts)+1]] <- is.na(x[start,1])
+        start <- jj
+        left <- right
+      }
+    list(tree = x, rectangles = rectangles, labels = labels, lines = lines, 
+      is.runts = is.runts, subtree = subtree, n_branches = length(rectangles))
+  }
+}
+
+plot.clusterTreeDensityPlot <- function(x){
+  for (ii in c(1:x$n_branches)) {
+    if(!x$is.runt[ii]){
+      graphics::rect(x$rectangles[ii]$xleft, x$rectangles[ii]$ybottom,
+        x$rectangles[ii]$xright, x$rectangles[ii]$ytop)
+    }
+  }
+}
