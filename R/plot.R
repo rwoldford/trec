@@ -75,6 +75,8 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
                           labels.col[order]
                           } else {labels.col}
                         )
+  ###
+  ###
   if(frame.plot){
     graphics::box(...)
   }
@@ -102,10 +104,14 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
 #' @param labels.col colours of the object labels in the plot
 #' @return Invisibly returns the coordinates of the bottom level rectangles, each as
 #'  (left bottom right top)
-#' @export
 plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop, 
                                   labels.plot, labels, col, 
                                   labels.cex = 1, labels.col){
+  ###
+  # This function plots clusterTree object recursively
+  # for each recursive call, it plots rectangles, lines, labels in this layer
+  # then this function calls itself recursively to plot next layer, etc
+  ###
   n <- dim(x)[1]   
   if(dim(x)[2]==1){
     start <- 1
@@ -200,18 +206,44 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop,
   }
 }
 
+
+#' transform a clusterTree object into a clusterTreeDensityPlot object
+#' clusterTreeDensityPlot object is a unified data structure for recording information
+#' related to plotting clusterTree object
+#' @param x a clusterTree object
+#' @return a clusterTreeDensityPlot object
+#' @return clusterTreeDensityPlot is a nested structure which record information for 
+#' @return plotting clusterTree 
+#' \item{tree}{a matrix, tree attribute of clusterTree object that remains to be plotted}
+#' \item{rectangles}{a list of rectangles, each element record left,bottom,right,top coordinates of the rectangle}
+#' \item{labels}{a list of list of labels' index, each element record labels' index for corresponding rectangle}
+#' \item{lines}{a list of list of lines, each element record lines' start and end point}
+#' \item{is.runts}{a list of boolean variable, each element record whether that rectangle is runts or not}
+#' \item{subtree}{a list of subtrees, each element represents the nested subtree of corresponding rectangle}
+#' @examples
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' clustering1<-stats::hclust(dist(data),method='single')
+#' clustering2<-kmeans(data,centers=3)
+#' clustering3<-dbscan::dbscan(data,eps=.1)
+#' clusterTree <- combineClusterings(clustering1,clustering2,clustering3)
+#' res <- clusterTreeToClusterDensityPlot(clusterTree)
+#' @export 
 clusterTreeToClusterTreeDensityPlot <- function(x){
   order <- reOrderClusterTreeMatrix(x$tree)
   orderedTree <- as.matrix(x$tree[order,])
-  labels <- c(1:nrow(x$tree))
-  labels <- labels[order]
+  labels_index <- c(1:nrow(x$tree))
+  labels_index <- labels_index[order]
   res <- clusterTreeToClusterTreeDensityPlotHelper(x = orderedTree, xleft = 0, ybottom = 0, 
-    xright = 1, ytop = 1, labels = labels)
+    xright = 1, ytop = 1, labels_index = labels_index)
   class(res) <- c("clusterTreeDensityPlot", class(res))
   res
 }
 
-clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright, ytop, labels){
+
+clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright, ytop, labels_index){
   n <- nrow(x)    
   if(ncol(x)==1){
     start <- 1
@@ -237,7 +269,7 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
         rectangles[[length(rectangles)+1]] <- list(xleft = xl, ybottom = yb, xright = xr, ytop = yt)
         labels_x <- seq(from = xl, to = xr, length.out = jj-start) 
         labels_y <- (yb+ybottom)/2 
-        labels_text <- labels[start:(jj-1)]
+        labels_text <- labels_index[start:(jj-1)]
         labels_tmp <- list()
         for (kk in c(1:(jj-start))) {
           labels_tmp[[kk]] <- list(x=labels_x[kk], y=labels_y, text = labels_text[kk])
@@ -276,7 +308,7 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
         rectangles[[length(rectangles)+1]] <- list(xleft = xl, ybottom = yb, xright = xr, ytop = yt)
         labels_x <- seq(from = xl, to = xr, length.out = jj-start) 
         labels_y <- (yb+ybottom)/2 
-        labels_text <- labels[start:(jj-1)]
+        labels_text <- labels_index[start:(jj-1)]
         labels_tmp <- list()
         for (kk in c(1:(jj-start))) {
           labels_tmp[[kk]] <- list(x=labels_x[kk], y=labels_y, text = labels_text[kk])
@@ -287,13 +319,13 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
                                             ybottom = ybottomupdate, 
                                             xright = xleft+right, 
                                             ytop = ytop, 
-                                            labels = labels[start:(jj-1)])
+                                            labels_index = labels_index[start:(jj-1)])
         subtree[[length(subtree)+1]] <- subtree_tmp
         lines_tmp <- list()
         rectangle_tmp <- subtree_tmp$rectangles
         for (kk in 1:length(rectangle_tmp)) {
           cur_rectangle <- rectangle_tmp[[kk]]
-          lines_tmp[[length(lines_tmp)+1]] <- list(start = list(x = (xl+xr)/2.0, y = yt), end = list(x = (cur_rectangle$xleft + cur_rectangle$xright)/2.0), y = cur_rectangle$ybottom)
+          lines_tmp[[length(lines_tmp)+1]] <- list(start = list(x = (xl+xr)/2.0, y = yt), end = list(x = (cur_rectangle$xleft + cur_rectangle$xright)/2.0, y = cur_rectangle$ybottom))
         }
         lines[[length(lines)+1]] <- lines_tmp
         is.runts[[length(is.runts)+1]] <- is.na(x[start,1])
@@ -305,11 +337,125 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
   }
 }
 
-plot.clusterTreeDensityPlot <- function(x){
+#' plot a clusterTreeDensityPlot object
+#' @param x a clusterTree object
+#' @param y NULL.  Will be ignored with a warning if non-NULL
+#' @param labels labels for each data point
+#' @param axes whether to plot axis on the left
+#' @param frame.plot whether to plot frame for density plot
+#' @param ann whether to annotate main, sub, xlab, ylab
+#' @param main main title for the plot
+#' @param sub subtitle for the plot
+#' @param xlab label for x-axis
+#' @param ylab label for y-axis
+#' @param col color of rectangle
+#' @param labels.cex a character expansion multiplier for the size of the object labels in the plot
+#' @param labels.col colours of the object labels in the plot
+#' @param ... remains to be processed
+#' @return No return value  
+#' @examples
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' clustering1<-stats::hclust(dist(data),method='single')
+#' clustering2<-kmeans(data,centers=3)
+#' clustering3<-dbscan::dbscan(data,eps=.1)
+#' res <- combineClusterings(clustering1,clustering2,clustering3)
+#' res2 <- clusterTreeToClusterTreeDensityPlot(res)
+#' plot(res2)
+#' @export 
+plot.clusterTreeDensityPlot <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
+                             main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL, ylab = "Height",
+                             col = NULL, labels.cex =1, labels.col = NULL,  ...){
+  if (!is.null(y)) warning("argument y is ignored")
+  # gather what we need for clusterTree object and introduce to plotClusterTreeHelper function
+  # variable checking
+  if(is.null(col))
+    col <- 'grey'
+  if(is.null(labels.col))
+    labels.col <- 'black'
+  # process variable labels
+  # processing accordingly with boolean input and vector input
+  labels.plot <- FALSE
+  if(is.logical(labels)){
+    labels.plot <- labels
+    labels <- paste("object", 1:nrow(x$tree))
+  }else{
+    if(is.null(labels)){
+      labels.plot <- FALSE
+      labels <- paste("object", 1:nrow(x$tree))
+    }else{
+      if(!is.vector(labels)){
+        stop("labels must be a logical or vector!")
+      }else{
+        if(length(labels) != nrow(x$tree)){
+          stop('length of labels and rows of clusterTree object does not match!')
+        }else{
+          labels.plot <- TRUE
+        }
+      }
+    }
+  }
+  ###
+  ###
+  # plot clusterTreeDensityPlot recursively
+  plot.new()
+  plotClusterTreeDensityPlotHelper(x = x, labels.plot = labels.plot, labels = labels, col = col, 
+                                  labels.cex = 2*labels.cex/ncol(x$tree), labels.col = if (length (labels.col) == length(labels)){
+                                                           labels.col[order]}else{labels.col})
+  ###
+  ###
+  if(frame.plot){
+    graphics::box(...)
+  }
+  if(ann){
+    if(is.null(sub))
+      sub <- "density plot"
+    graphics::title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...)
+  }
+  if(axes)
+    height <- as.double(ncol(x$tree))
+    graphics::axis(2,(1/2/height)*seq(1,2*height,by = 2),labels = c(1:height))
+}
+
+#' helper function to plot a clusterTreeDensityPlot object
+plotClusterTreeDensityPlotHelper <- function(x, labels.plot, labels, col, 
+                                  labels.cex, labels.col){
   for (ii in c(1:x$n_branches)) {
-    if(!x$is.runt[ii]){
-      graphics::rect(x$rectangles[ii]$xleft, x$rectangles[ii]$ybottom,
-        x$rectangles[ii]$xright, x$rectangles[ii]$ytop)
+    if(!x$is.runts[[ii]]){
+      graphics::rect(x$rectangles[[ii]]$xleft, x$rectangles[[ii]]$ybottom,
+        x$rectangles[[ii]]$xright, x$rectangles[[ii]]$ytop, col = col)
+      if(length(x$lines[[ii]])>0){
+        for (jj in c(1:length(x$lines[[ii]]))) {
+          if(!x$subtree[[ii]]$is.runts[[jj]]){
+            graphics::segments(x0 = x$lines[[ii]][[jj]]$start$x,
+              y0 = x$lines[[ii]][[jj]]$start$y,
+              x1 = x$lines[[ii]][[jj]]$end$x,
+              y1 = x$lines[[ii]][[jj]]$end$y)
+          }
+        }
+      }
+      if(labels.plot){
+        if(length(x$labels[[ii]])>0){
+          for (jj in c(1:length(x$labels[[ii]]))) {
+            graphics::text(x = x$labels[[ii]][[jj]]$x,
+                           y = x$labels[[ii]][[jj]]$y,
+                           labels = labels[x$labels[[ii]][[jj]]$text],
+                           cex = labels.cex, 
+                           col = labels.col[x$labels[[ii]][[jj]]$text],
+                           srt = 90)
+          }
+        }
+      }
+    }
+  }
+  if(length(x$subtree)>0){
+    for (ii in c(1:length(x$subtree))) {
+      plotClusterTreeDensityPlotHelper(x$subtree[[ii]], labels.plot = labels.plot,
+                                       labels = labels, col = col, 
+                                       labels.cex = labels.cex, labels.col = labels.col)
     }
   }
 }
+

@@ -2,7 +2,8 @@
 % Please edit documentation in R/clusterTree.R
 \name{combineClusterings}
 \alias{combineClusterings}
-\title{This is a new ensemble method for combining multiple clustering outcomes}
+\title{An ensemble method for combining multiple clustering outcomes based
+on monotonic graph families of Zhou and Oldford}
 \usage{
 combineClusterings(clustering1, clustering2, ..., labels = NULL)
 }
@@ -22,7 +23,8 @@ a clusterTree object, which is the final clustering result from combining
 all input clustering results
 }
 \description{
-This is a new ensemble method for combining multiple clustering outcomes
+An ensemble method for combining multiple clustering outcomes based
+on monotonic graph families of Zhou and Oldford
 }
 \examples{
 data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
