@@ -1,3 +1,60 @@
+clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE){
+  if (missing(clustering1)) stop("Must provide output of clustering for first argument")
+  if (missing(clustering2)) stop("Must provide output of clustering for second argument")
+  clusterTrees <- list(clustering1, clustering2, ...)
+  n <- length(clusterTrees)
+  for (ii in c(1:n)) {
+    if(!(class(clusterTrees[[ii]])=='clusterTree')[1])
+      stop(ii,'th argument is not clusterTree object')
+  }
+  distance <- matrix(data = 0, nrow = n, ncol = n)
+  for (ii in c(1:(n-1))) {
+    for (jj in c((ii+1):n)) {
+      distance[ii,jj] <- getClusDist(clusterTrees[[ii]], clusterTrees[[jj]])
+      distance[jj,ii] <- distance[ii,jj]
+    }
+  }
+  rownames(distance) <- c(1:n)
+  colnames(distance) <- c(1:n)
+  res <- list(distance = distance, Size = n, Diag = diag, Upper = upper)
+  class(res) <- c("clusDist",class(res))
+  res
+}
+
+print.clusDist <- function(x, diag = NULL, upper = NULL,
+	     digits = getOption("digits"), justify = "none", right = TRUE, ...){
+  if(length(x)) {
+	  if(is.null(diag))
+	    diag <- if(is.null(a <- x$Diag)) FALSE else a
+	if(is.null(upper))
+	    upper <- if(is.null(a <- x$Upper)) FALSE else a
+
+	m <- as.matrix(x$distance)
+	cf <- format(m, digits = digits, justify = justify)
+	if(!upper)
+	    cf[row(cf) < col(cf)] <- ""
+	if(!diag)
+	    cf[row(cf) == col(cf)] <- ""
+
+	## Better: use an improved prettyNum() function -> ../../base/R/format.R
+	##-	if(any((i <- m == floor(m))))
+	##-	    cf[i] <- sub("0+$", "", cf[i])
+	print(if(diag || upper) cf else cf[-1, -x$Size, drop = FALSE],
+	      quote = FALSE, right = right, ...)
+  } else {
+	  cat(data.class(x),"(0)\n", sep = "")
+  }
+  invisible(x)
+}
+
+distToGram <- function(x){
+  if(!(class(x)=='clusDist')[1])
+      stop('input argument is not a clusDist object')
+  n <- x$Size
+  transform_matrix <- diag(nrow = n, ncol = n) - 1/n * matrix(data = 1, nrow = n, ncol = n)
+  res <- (-1/2)*transform_matrix %*% (x$distance * x$distance) %*% transform_matrix
+  res
+}
 
 #' Calculate distance of two hierarchical clustering matrix
 #' @param clustering1 The first clustering as a branch component
@@ -13,7 +70,7 @@
 #' clusDust(clust1,clust2)
 #' @export
 #' 
-clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
+getClusDist <- function(clustering1, clustering2)
 {
   branchComponent1 <- getClusterTree(clustering1)$tree
   branchComponent2 <- getClusterTree(clustering2)$tree
