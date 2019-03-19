@@ -38,5 +38,5 @@ clustering1<-stats::hclust(dist(data),method='single')
 clustering2<-kmeans(data,centers=3)
 clustering3<-dbscan::dbscan(data,eps=.1)
 clusterTree <- combineClusterings(clustering1,clustering2,clustering3)
-res <- clusterTreeToClusterDensityPlot(clusterTree)
+res <- clusterTreeToClusterTreeDensityPlot(clusterTree)
 }

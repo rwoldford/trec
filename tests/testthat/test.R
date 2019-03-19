@@ -128,8 +128,8 @@ set.seed(seeds[1])
 kMean1 <- kmeans(data,centers=k,iter.max=15)
 set.seed(seeds[2])
 kMean2 <- kmeans(data,centers=k+1, iter.max = 15)
-distance <- getClusteringDistance(kMean1,kMean2)
-expect_equal(floor(distance),0)
+distance <- clusDist(kMean1,kMean2)
+expect_equal(floor(distance$distance[1,2]),0)
 ####### Generating clusters via K means with 10 random starts #######
 #
 #
@@ -148,8 +148,8 @@ set.seed(seeds[1])
 kMean1 <- kmeans(data,centers=k,iter.max=15)
 set.seed(seeds[2])
 kMean2 <- kmeans(data,centers=k+1, iter.max = 15)
-distance <- getClusteringDistance(kMean1,kMean2)
-expect_equal(floor(distance),0)
+distance <- clusDist(kMean1,kMean2)
+expect_equal(floor(distance$distance[1,2]),0)
 ####### Combining K means (k=2) with Gaussian model based #######
 #
 ######
@@ -159,7 +159,7 @@ kMean <- kmeans(data,centers=k,iter.max=15)
 require(mclust)
 mClust <- Mclust(data)
 
-distance <- getClusteringDistance(kMean,mClust)
-expect_equal(floor(distance),0)
+distance <- clusDist(kMean,mClust)
+expect_equal(floor(distance$distance[1,2]),0)
 })
 

@@ -156,7 +156,7 @@ mergeToMatrix <- function( merge ) {
 #' clustering1 <- stats::hclust(dist(data),method='single')
 #' clustering2 <- kmeans(data,centers=3)
 #' clustering3 <- dbscan::dbscan(data,eps=.1)
-#' combineClusterings(clustering1,clustering2,clustering3)
+#' res <- combineClusterings(clustering1,clustering2,clustering3)
 #' 
 #' @export
 combineClusterings <- function(clustering1, clustering2, 
@@ -286,7 +286,6 @@ combineClusterings <- function(clustering1, clustering2,
 #' @param x is the tree attribute of clusterTree object
 #' @param labels labels is the order of rows of x
 #' @return an order which simplies the process of plotting dendogram/density plot
-#' @export
 reOrderClusterTreeMatrix <- function(x,labels=NULL)
 {
   if(!is.matrix(x))

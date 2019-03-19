@@ -1,12 +1,30 @@
+#' calculate distance between clustering results
+#' @param clustering1 result of some clustering, for example output from hclust(). A clustering
+#' can also be an n by m  matrix, where n is the number of data points and m is the number
+#' of levels in the clustering hierarchy. 
+#' @param clustering2 result of a second clustering, to be combined with the first.
+#' @param ... results of other clustering methods, to be combined with the first two.
+#' @param diag whether to plot the diagonal of distance matrix
+#' @param upper whether to plot the upper half of diagonal matrix
+#' @examples 
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' clustering1 <- stats::hclust(dist(data),method='single')
+#' clustering2 <- kmeans(data,centers=3)
+#' clustering3 <- dbscan::dbscan(data,eps=.8)
+#' res <- clusDist(clustering1,clustering2,clustering3)
+#' @export
 clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE){
   if (missing(clustering1)) stop("Must provide output of clustering for first argument")
   if (missing(clustering2)) stop("Must provide output of clustering for second argument")
   clusterTrees <- list(clustering1, clustering2, ...)
   n <- length(clusterTrees)
-  for (ii in c(1:n)) {
-    if(!(class(clusterTrees[[ii]])=='clusterTree')[1])
-      stop(ii,'th argument is not clusterTree object')
-  }
+  #for (ii in c(1:n)) {
+  #  if(!(class(clusterTrees[[ii]])=='clusterTree')[1])
+  #    stop(ii,'th argument is not clusterTree object')
+  #}
   distance <- matrix(data = 0, nrow = n, ncol = n)
   for (ii in c(1:(n-1))) {
     for (jj in c((ii+1):n)) {
@@ -21,6 +39,15 @@ clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
   res
 }
 
+#' print distance(a clusDist object) between clustering results
+#' @param x a clusDist object
+#' @param diag whether to plot diagonal of distance matrix
+#' @param upper whether to plot upper half of distance matrix
+#' @param digits precision digits to retain
+#' @param justify should a character vector be left-justified (the default), right-justified, centred or left alone. Can be abbreviated.
+#' @param right logical, indicating whether or not strings should be right aligned.
+#' @param ... remain to be processed
+#' @export
 print.clusDist <- function(x, diag = NULL, upper = NULL,
 	     digits = getOption("digits"), justify = "none", right = TRUE, ...){
   if(length(x)) {
@@ -47,6 +74,19 @@ print.clusDist <- function(x, diag = NULL, upper = NULL,
   invisible(x)
 }
 
+#' transform clusDist object to Gram matrix
+#' @param x a clusDist object
+#' @examples 
+#' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
+#'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
+#'               )
+#' clustering1 <- stats::hclust(dist(data),method='single')
+#' clustering2 <- kmeans(data,centers=3)
+#' clustering3 <- dbscan::dbscan(data,eps=.8)
+#' distance <- clusDist(clustering1,clustering2,clustering3)
+#' res <- distToGram(distance)
+#' @export
 distToGram <- function(x){
   if(!(class(x)=='clusDist')[1])
       stop('input argument is not a clusDist object')
@@ -67,7 +107,7 @@ distToGram <- function(x){
 #'               )
 #' clust1 <- stats::hclust(dist(data),method='complete')
 #' clust2 <- stats::hclust(dist(data),method='single')
-#' clusDust(clust1,clust2)
+#' clusDist(clust1,clust2)
 #' @export
 #' 
 getClusDist <- function(clustering1, clustering2)

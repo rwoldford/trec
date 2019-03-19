@@ -229,7 +229,7 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop,
 #' clustering2<-kmeans(data,centers=3)
 #' clustering3<-dbscan::dbscan(data,eps=.1)
 #' clusterTree <- combineClusterings(clustering1,clustering2,clustering3)
-#' res <- clusterTreeToClusterDensityPlot(clusterTree)
+#' res <- clusterTreeToClusterTreeDensityPlot(clusterTree)
 #' @export 
 clusterTreeToClusterTreeDensityPlot <- function(x){
   order <- reOrderClusterTreeMatrix(x$tree)
@@ -400,7 +400,7 @@ plot.clusterTreeDensityPlot <- function(x, y = NULL, labels = NULL, axes = TRUE,
   ###
   ###
   # plot clusterTreeDensityPlot recursively
-  plot.new()
+  graphics::plot.new()
   plotClusterTreeDensityPlotHelper(x = x, labels.plot = labels.plot, labels = labels, col = col, 
                                   labels.cex = 2*labels.cex/ncol(x$tree), labels.col = if (length (labels.col) == length(labels)){
                                                            labels.col[order]}else{labels.col})
@@ -420,6 +420,12 @@ plot.clusterTreeDensityPlot <- function(x, y = NULL, labels = NULL, axes = TRUE,
 }
 
 #' helper function to plot a clusterTreeDensityPlot object
+#' @param x a clusterTreeDensityPlot object
+#' @param labels.plot whether to plot labels
+#' @param labels of data points
+#' @param col color of rectangles
+#' @param labels.cex cex of labels
+#' @param labels.col color of labels 
 plotClusterTreeDensityPlotHelper <- function(x, labels.plot, labels, col, 
                                   labels.cex, labels.col){
   for (ii in c(1:x$n_branches)) {

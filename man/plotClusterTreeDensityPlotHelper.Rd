@@ -7,6 +7,19 @@
 plotClusterTreeDensityPlotHelper(x, labels.plot, labels, col, labels.cex,
   labels.col)
 }
+\arguments{
+\item{x}{a clusterTreeDensityPlot object}
+
+\item{labels.plot}{whether to plot labels}
+
+\item{labels}{of data points}
+
+\item{col}{color of rectangles}
+
+\item{labels.cex}{cex of labels}
+
+\item{labels.col}{color of labels}
+}
 \description{
 helper function to plot a clusterTreeDensityPlot object
 }

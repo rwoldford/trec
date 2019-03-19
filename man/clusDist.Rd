@@ -2,27 +2,33 @@
 % Please edit documentation in R/distance.R
 \name{clusDist}
 \alias{clusDist}
-\title{Calculate distance of two hierarchical clustering matrix}
+\title{calculate distance between clustering results}
 \usage{
 clusDist(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
 }
 \arguments{
-\item{clustering1}{The first clustering as a branch component}
+\item{clustering1}{result of some clustering, for example output from hclust(). A clustering
+can also be an n by m  matrix, where n is the number of data points and m is the number
+of levels in the clustering hierarchy.}
 
-\item{clustering2}{The second clustering as a branch component}
-}
-\value{
-distance between 0 and square root of 2
+\item{clustering2}{result of a second clustering, to be combined with the first.}
+
+\item{...}{results of other clustering methods, to be combined with the first two.}
+
+\item{diag}{whether to plot the diagonal of distance matrix}
+
+\item{upper}{whether to plot the upper half of diagonal matrix}
 }
 \description{
-Calculate distance of two hierarchical clustering matrix
+calculate distance between clustering results
 }
 \examples{
 data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
               )
-clust1 <- stats::hclust(dist(data),method='complete')
-clust2 <- stats::hclust(dist(data),method='single')
-clusDust(clust1,clust2)
+clustering1 <- stats::hclust(dist(data),method='single')
+clustering2 <- kmeans(data,centers=3)
+clustering3 <- dbscan::dbscan(data,eps=.8)
+res <- clusDist(clustering1,clustering2,clustering3)
 }
