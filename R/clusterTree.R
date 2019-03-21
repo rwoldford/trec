@@ -55,12 +55,17 @@ matrixToClusterTree <- function(x, labels = NULL){
 #' @export
 mergeToMatrix <- function( merge ) {
   
-  # m is number of points
+  # m is number of points minus one
+  # n is number of points
   m <- dim(merge)[1]
   n <- m + 1
   
+  # verticeSets record data points in each cluster by
+  # decoding input merge
   verticesSets <- array(0,dim=c(m,n))
+  # assign clusterId based on verticeSets
   componentSets <- array(0,dim=c(m,n))
+  # record which layer each data point belongs to 
   layerSet <- array(0,dim=c(m,1))
   
   # get the coorresponding vertices set for each row in merge
@@ -151,7 +156,7 @@ mergeToMatrix <- function( merge ) {
 #' clustering1 <- stats::hclust(dist(data),method='single')
 #' clustering2 <- kmeans(data,centers=3)
 #' clustering3 <- dbscan::dbscan(data,eps=.1)
-#' combineClusterings(clustering1,clustering2,clustering3)
+#' res <- combineClusterings(clustering1,clustering2,clustering3)
 #' 
 #' @export
 combineClusterings <- function(clustering1, clustering2, 
@@ -281,7 +286,6 @@ combineClusterings <- function(clustering1, clustering2,
 #' @param x is the tree attribute of clusterTree object
 #' @param labels labels is the order of rows of x
 #' @return an order which simplies the process of plotting dendogram/density plot
-#' @export
 reOrderClusterTreeMatrix <- function(x,labels=NULL)
 {
   if(!is.matrix(x))
