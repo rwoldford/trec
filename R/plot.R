@@ -354,6 +354,7 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
 #' print number of branches of clusterTreeDensityPlot object
 #' @param x a clusterTreeDensityPlot object
 #' @return a integer, represents number of branches
+#' @export
 numBranches <- function(x){
   x$n_branches
 }
@@ -361,6 +362,7 @@ numBranches <- function(x){
 #' show treeMatrix of clusterTreeDensityPlot object
 #' @param x a clusterTreeDensityPlot object
 #' @return a matrix, represents treeMatrix
+#' @export
 showTreeMatrix <- function(x){
   x$treeMatrix
 }
@@ -368,6 +370,7 @@ showTreeMatrix <- function(x){
 #' show coordinates of rectangles in clusterTreeDensityPlot object
 #' @param x a clusterTreeDensityPlot object
 #' @return a list of rectangle coordinates
+#' @export
 showRectangles <- function(x){
   x$rectangles
 }
@@ -382,6 +385,7 @@ showLines <- function(x){
 #' show coordinates of labels in clusterTreeDensityPlot object
 #' @param x a clusterTreeDensityPlot object
 #' @return a list of labels' coordinates
+#' @export
 showLabels <- function(x){
   x$labels
 }
@@ -389,6 +393,7 @@ showLabels <- function(x){
 #' get plot information on a layer
 #' @param x a clusterTreeDensityPlot object
 #' @return a list which contains plot information 
+#' @export
 getBranchInfo <- function(x, layer = 1){
   if(layer <= 0)
     stop('layer must be greater than or equal to 1')
