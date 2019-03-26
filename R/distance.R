@@ -124,8 +124,8 @@ distToGram <- function(x){
 #' 
 getClusDist <- function(clustering1, clustering2)
 {
-  branchComponent1 <- getClusterTree(clustering1)$tree
-  branchComponent2 <- getClusterTree(clustering2)$tree
+  branchComponent1 <- getClusterTree(clustering1)$treeMatrix
+  branchComponent2 <- getClusterTree(clustering2)$treeMatrix
   branchComponent1[is.na(branchComponent1)] <- 0
   branchComponent2[is.na(branchComponent2)] <- 0
   n <- nrow(branchComponent1)

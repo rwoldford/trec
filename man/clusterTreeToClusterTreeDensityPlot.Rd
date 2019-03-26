@@ -22,7 +22,7 @@ plotting clusterTree
 \item{labels}{a list of list of labels' index, each element record labels' index for corresponding rectangle}
 \item{lines}{a list of list of lines, each element record lines' start and end point}
 \item{is.runts}{a list of boolean variable, each element record whether that rectangle is runts or not}
-\item{subtree}{a list of subtrees, each element represents the nested subtree of corresponding rectangle}
+\item{subtree}{a list of subtree, each element represents the nested subtree of corresponding rectangle}
 }
 \description{
 transform a clusterTree object into a clusterTreeDensityPlot object
