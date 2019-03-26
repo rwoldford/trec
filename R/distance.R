@@ -25,54 +25,61 @@ clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
   #  if(!(class(clusterTrees[[ii]])=='clusterTree')[1])
   #    stop(ii,'th argument is not clusterTree object')
   #}
-  distance <- matrix(data = 0, nrow = n, ncol = n)
+  distance <- rep(1, length.out = n*(n-1)/2L)
   for (ii in c(1:(n-1))) {
+    count <- (2*n - ii)*(ii-1)/2L
     for (jj in c((ii+1):n)) {
-      distance[ii,jj] <- getClusDist(clusterTrees[[ii]], clusterTrees[[jj]])
-      distance[jj,ii] <- distance[ii,jj]
+      distance[count + jj - ii] <- getClusDist(clusterTrees[[ii]], clusterTrees[[jj]])
     }
   }
-  rownames(distance) <- c(1:n)
-  colnames(distance) <- c(1:n)
-  res <- list(distance = distance, Size = n, Diag = diag, Upper = upper)
-  class(res) <- c("clusDist",class(res))
-  res
+  # rownames(distance) <- c(1:n)
+  # colnames(distance) <- c(1:n)
+  attr(distance,'Size') <- n
+  attr(distance,'Labels') <- dimnames(distance)[[1L]]
+  attr(distance,'Diag') <- diag
+  attr(distance,'Upper') <- upper
+  attr(distance, 'method') <- 'clustering distance'
+  attr(distance, 'call') <- match.call()
+  attr(distance, 'class') <- 'dist'
+  class(distance) <- 'dist'
+  distance
 }
 
-#' print distance(a clusDist object) between clustering results
-#' @param x a clusDist object
-#' @param diag whether to plot diagonal of distance matrix
-#' @param upper whether to plot upper half of distance matrix
-#' @param digits precision digits to retain
-#' @param justify should a character vector be left-justified (the default), right-justified, centred or left alone. Can be abbreviated.
-#' @param right logical, indicating whether or not strings should be right aligned.
-#' @param ... remain to be processed
-#' @export
-print.clusDist <- function(x, diag = NULL, upper = NULL,
-	     digits = getOption("digits"), justify = "none", right = TRUE, ...){
-  if(length(x)) {
-	  if(is.null(diag))
-	    diag <- if(is.null(a <- x$Diag)) FALSE else a
-	if(is.null(upper))
-	    upper <- if(is.null(a <- x$Upper)) FALSE else a
 
-	m <- as.matrix(x$distance)
-	cf <- format(m, digits = digits, justify = justify)
-	if(!upper)
-	    cf[row(cf) < col(cf)] <- ""
-	if(!diag)
-	    cf[row(cf) == col(cf)] <- ""
-
-	## Better: use an improved prettyNum() function -> ../../base/R/format.R
-	##-	if(any((i <- m == floor(m))))
-	##-	    cf[i] <- sub("0+$", "", cf[i])
-	print(if(diag || upper) cf else cf[-1, -x$Size, drop = FALSE],
-	      quote = FALSE, right = right, ...)
-  } else {
-	  cat(data.class(x),"(0)\n", sep = "")
-  }
-  invisible(x)
-}
+# #' print distance(a clusDist object) between clustering results
+# #' @param x a clusDist object
+# #' @param diag whether to plot diagonal of distance matrix
+# #' @param upper whether to plot upper half of distance matrix
+# #' @param digits precision digits to retain
+# #' @param justify should a character vector be left-justified (the default), right-justified, centred or left alone. Can be abbreviated.
+# #' @param right logical, indicating whether or not strings should be right aligned.
+# #' @param ... remain to be processed
+# #' @export
+# print.clusDist <- function(x, diag = NULL, upper = NULL,
+# 	     digits = getOption("digits"), justify = "none", right = TRUE, ...){
+#   if(length(x)) {
+# 	  if(is.null(diag))
+# 	    diag <- if(is.null(a <- x$Diag)) FALSE else a
+# 	if(is.null(upper))
+# 	    upper <- if(is.null(a <- x$Upper)) FALSE else a
+# 
+# 	m <- as.matrix(x$distance)
+# 	cf <- format(m, digits = digits, justify = justify)
+# 	if(!upper)
+# 	    cf[row(cf) < col(cf)] <- ""
+# 	if(!diag)
+# 	    cf[row(cf) == col(cf)] <- ""
+# 
+# 	## Better: use an improved prettyNum() function -> ../../base/R/format.R
+# 	##-	if(any((i <- m == floor(m))))
+# 	##-	    cf[i] <- sub("0+$", "", cf[i])
+# 	print(if(diag || upper) cf else cf[-1, -x$Size, drop = FALSE],
+# 	      quote = FALSE, right = right, ...)
+#   } else {
+# 	  cat(data.class(x),"(0)\n", sep = "")
+#   }
+#   invisible(x)
+# }
 
 #' transform clusDist object to Gram matrix
 #' @param x a clusDist object
@@ -88,11 +95,16 @@ print.clusDist <- function(x, diag = NULL, upper = NULL,
 #' res <- distToGram(distance)
 #' @export
 distToGram <- function(x){
-  if(!(class(x)=='clusDist')[1])
+  if(!(class(x)=='dist'))
       stop('input argument is not a clusDist object')
-  n <- x$Size
-  transform_matrix <- diag(nrow = n, ncol = n) - 1/n * matrix(data = 1, nrow = n, ncol = n)
-  res <- (-1/2)*transform_matrix %*% (x$distance * x$distance) %*% transform_matrix
+  n <- attr(x,'Size')
+  # transform_matrix <- diag(nrow = n, ncol = n) - 1/n * matrix(data = 1, nrow = n, ncol = n)
+  x <- as.matrix(x)
+  res <- x * x 
+  rowAverage <- colSums(res)/n
+  res <- sweep(res,2,rowAverage)
+  colAverage <- rowSums(res)/n
+  res <- sweep(res,1,colAverage)
   res
 }
 
