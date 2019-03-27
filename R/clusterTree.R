@@ -31,7 +31,7 @@ matrixToClusterTree <- function(x, labels = NULL){
   }
   ####
   ####
-  tree <- list(tree = x, labels = labels)
+  tree <- list(treeMatrix = x, labels = labels)
   class(tree) <- c("clusterTree", class(tree))
   tree
 }
@@ -166,12 +166,12 @@ combineClusterings <- function(clustering1, clustering2,
   clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
   
   # n is number of data points
-  n <- nrow(clusterTrees[[1]]$tree)
+  n <- nrow(clusterTrees[[1]]$treeMatrix)
   # combine clusterTrees
-  clustering<-clusterTrees[[1]]$tree
+  clustering<-clusterTrees[[1]]$treeMatrix
   for(i in 2:length(clusterTrees))
   {
-    clustering<-cbind(clustering,clusterTrees[[2]]$tree)  
+    clustering<-cbind(clustering,clusterTrees[[2]]$treeMatrix)  
   }
   clustering[is.na(clustering)] <- 0
   
@@ -286,6 +286,7 @@ combineClusterings <- function(clustering1, clustering2,
 #' @param x is the tree attribute of clusterTree object
 #' @param labels labels is the order of rows of x
 #' @return an order which simplies the process of plotting dendogram/density plot
+#' @export
 reOrderClusterTreeMatrix <- function(x,labels=NULL)
 {
   if(!is.matrix(x))
