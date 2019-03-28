@@ -46,53 +46,42 @@ clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
 }
 
 
-# #' print distance(a clusDist object) between clustering results
-# #' @param x a clusDist object
-# #' @param diag whether to plot diagonal of distance matrix
-# #' @param upper whether to plot upper half of distance matrix
-# #' @param digits precision digits to retain
-# #' @param justify should a character vector be left-justified (the default), right-justified, centred or left alone. Can be abbreviated.
-# #' @param right logical, indicating whether or not strings should be right aligned.
-# #' @param ... remain to be processed
-# #' @export
-# print.clusDist <- function(x, diag = NULL, upper = NULL,
-# 	     digits = getOption("digits"), justify = "none", right = TRUE, ...){
-#   if(length(x)) {
-# 	  if(is.null(diag))
-# 	    diag <- if(is.null(a <- x$Diag)) FALSE else a
-# 	if(is.null(upper))
-# 	    upper <- if(is.null(a <- x$Upper)) FALSE else a
-# 
-# 	m <- as.matrix(x$distance)
-# 	cf <- format(m, digits = digits, justify = justify)
-# 	if(!upper)
-# 	    cf[row(cf) < col(cf)] <- ""
-# 	if(!diag)
-# 	    cf[row(cf) == col(cf)] <- ""
-# 
-# 	## Better: use an improved prettyNum() function -> ../../base/R/format.R
-# 	##-	if(any((i <- m == floor(m))))
-# 	##-	    cf[i] <- sub("0+$", "", cf[i])
-# 	print(if(diag || upper) cf else cf[-1, -x$Size, drop = FALSE],
-# 	      quote = FALSE, right = right, ...)
-#   } else {
-# 	  cat(data.class(x),"(0)\n", sep = "")
-#   }
-#   invisible(x)
-# }
-
-#' transform clusDist object to Gram matrix
-#' @param x a clusDist object
+#' transform dist object to Gram matrix
+#' @param x a dist object
 #' @examples 
+#' data <- rnorm(300, nrow =100)
+#' distance <- dist(data)
+#' g <- distToGram(distance)
+#' m <- as.matrix(scale(data, center = TRUE, scale = FALSE) )
+#' g2 <- m %*% t(m)
+#' round(sum(g - g2), 7)
+#' 
+#' # Using the between cluster distances
+#' set.seed(3141593)
 #' data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 #'               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
-#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
-#'               )
+#'               matrix(rnorm(100, mean = -10, sd = 3), nrow = 50))
+#'               
 #' clustering1 <- stats::hclust(dist(data),method='single')
 #' clustering2 <- kmeans(data,centers=3)
 #' clustering3 <- dbscan::dbscan(data,eps=.8)
-#' distance <- clusDist(clustering1,clustering2,clustering3)
-#' res <- distToGram(distance)
+#' clustering4 <- mclust::Mclust(data)
+#' distance <- clusDist(clustering1,clustering2,
+#'                      clustering3, clustering4)
+#' distance
+#' gram <- distToGram(distance)
+#' decomp <- eigen(gram)
+#' evals <- eigen(gram)$values
+#' coords <- eigen(gram)$vectors
+#' savePar <- par(mfrow = c(1,2))
+#' plot(evals/max(evals), type ="b", ylab = "contribution",
+#'      main = "Contributions to dimensionality",
+#'      sub = "Only two dimensions needed")
+#' plot(coords[, 1:2], pch = 0:3, cex = 3,
+#'      xlab = "Var 1", ylab = "Var 2",
+#'      main = "Comparing clusters in cluster space",
+#'      sub = "kmeans and model based agree")
+#' par(savePar)
 #' @export
 distToGram <- function(x){
   if(!(class(x)=='dist'))
@@ -105,6 +94,7 @@ distToGram <- function(x){
   res <- sweep(res,2,rowAverage)
   colAverage <- rowSums(res)/n
   res <- sweep(res,1,colAverage)
+  res <- - res / 2
   res
 }
 
