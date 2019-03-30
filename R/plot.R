@@ -29,13 +29,14 @@
 plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
                              main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL, ylab = "Height",
                              col = NULL, labels.cex =1, labels.col = NULL,  ...){
+  # x is a clusterTree to plot
   if (!is.null(y)) warning("argument y is ignored")
   
   # gather what we need for clusterTree object and introduce to plotClusterTreeHelper function
   order <- reOrderClusterTreeMatrix(x$treeMatrix)
-  orderedTree <- as.matrix(x$treeMatrix[order,])
+  orderedTreeMatrix <- as.matrix(x$treeMatrix[order,])
   graphics::plot.new()
-  height <- as.double(dim(x$treeMatrix)[2])
+  height <- as.double(ncol(x$treeMatrix))
   
   # variable checking
   if(is.null(col))
@@ -68,7 +69,7 @@ plot.clusterTree <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot
   ###
   ###
   # plot clusterTree recursively
-  plotClusterTreeHelper(x = orderedTree, xleft = 0, ybottom = 0, 
+  plotClusterTreeHelper(x = orderedTreeMatrix, xleft = 0, ybottom = 0, 
                         xright = 1, ytop = 1, labels.plot = labels.plot, 
                         labels = labels[order], col = col, labels.cex = labels.cex,
                         labels.col = if (length (labels.col) == length(labels)) {
@@ -211,6 +212,7 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop,
 #' clusterTreeDensityPlot object is a unified data structure for recording information
 #' related to plotting clusterTree object
 #' @param x a clusterTree object
+#' @param padding padding must have a value between 0 and 1, representing the proportion of space
 #' @return a clusterTreeDensityPlot object
 #' @return clusterTreeDensityPlot is a nested structure which record information for 
 #' @return plotting clusterTree 
@@ -231,45 +233,87 @@ plotClusterTreeHelper <- function(x, xleft, ybottom, xright, ytop,
 #' clusterTree <- combineClusterings(clustering1,clustering2,clustering3)
 #' res <- clusterTreeToClusterTreeDensityPlot(clusterTree)
 #' @export 
-clusterTreeToClusterTreeDensityPlot <- function(x){
+clusterTreeToClusterTreePlotInfo <- function(x, padding = .2){
+  if(class(x)!='clusterTree')
+    stop('input is not a clusterTree object!')
+  if(padding <= 0 | padding >= 1)
+    stop('padding must belong to (0,1)!')
   # reorder treeMatrix attribute so that data points within same 
   # cluster are close to each other
   order <- reOrderClusterTreeMatrix(x$treeMatrix)
-  orderedTree <- as.matrix(x$treeMatrix[order,])
-  # change labels' index accordingly
+  orderedTreeMatrix <- as.matrix(x$treeMatrix[order,])
+  # add labels' index into plot info
+  # this helps us identify the right index of labels for each label's position
   labels_index <- c(1:nrow(x$treeMatrix))
   labels_index <- labels_index[order]
-  res <- clusterTreeToClusterTreeDensityPlotHelper(x = orderedTree, xleft = 0, ybottom = 0, 
-    xright = 1, ytop = 1, labels_index = labels_index)
+  # call a helper function to help organize plot info for clusterTree in recursive fashion
+  res <- clusterTreeToClusterTreePlotInfoRecursiveHelper(x = orderedTreeMatrix, leftBorderPlot = 0, bottomBorder = 0, 
+    rightBorder = 1, topBorder = 1, labels_index = labels_index, padding = padding)
   # class(res) <- c("clusterTreeDensityPlot", class(res))
   res
 }
 
-
-clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright, ytop, labels_index){
-  # recursively process with each column of matrix x
-  # create a data structure with corresponding matrix
-  # each data structure consists current matrix(treeMatrix), rectangles, lines, is.runts, labels, n_branches and subtree
-  # length of each component is same
-  n <- nrow(x)    
-  if(ncol(x)==1){
-    start <- 1
-    left <- .0
+#' a function to help organize plot info for clusterTree in a recursive fashion
+#' First input is a ordered treeMatrix
+#' My model assumes we need to plot all rectangles, lines, labels etc on (0,1)*(0,1) canvas
+#' This function returns relative coordinates of rectangles, lines etc.
+#' @param treeMatrix a ordered treeMatrix of clusterTree
+#' @param leftBorderPlotRegion coordinate of the plot region's left border on (0,1)*(0,1) canvas
+#' @param bottomBorderPlotRegion coordinate of the plot region's bottom border on (0,1)*(0,1) canvas
+#' @param rightBorderPlotRegion coordinate of the plot region's right border on (0,1)*(0,1) canvas
+#' @param topBorderPlotRegion coordinate of the plot region's top border on (0,1)*(0,1) canvas
+#' @param labels_index index of labels to paste in each appropriate position
+#' @return 
+#' 
+clusterTreeToClusterTreePlotInfoRecursiveHelper <- function(treeMatrix, leftBorderPlotRegion, 
+                                                            bottomBorderPlotRegion, rightBorderPlotRegion,
+                                                            topBorderPlotRegion, labels_index, padding){
+  # target of this function is to generate plot info of treeMatrix recursively
+  # plot info includes treeMatrix, rectangles, labelsIndex, lines, is.runts, subtree, numBranches
+  # function is implemented recursively
+  n <- nrow(treeMatrix)
+  # if ncol(treeMatrix) is 1, build plot info directly, and return
+  # if ncol(treeMatrix) is not 1, build plot info for the first column, add
+  # those info into return value
+  # Then call function recursively to obtain plot info for treeMatrix[,2:n], 
+  # add plot info of treeMatrix[,2:n] as subtree attribute of return value 
+  if(ncol(treeMatrix)==1){
+    # build plot info directly
+    # use an row index iterator to iterate along first column
+    rowIndexIter <- 1
+    # relative position of leftBorderRectangleRegion to leftBorderPlotRegion
+    # at first leftBorderRectangleRegion is zero
+    leftBorderRectangleRegion <- .0
+    # initialize empty list for rectangles,labels,lines,is.runts and subtree
     rectangles <- list()
     labels <- list()
     lines <- list()
     is.runts <- list()
-    subtree <- list()
-    while(start <= n){
-        # find start and end of this particular cluster
-        jj <- start
-        while ((!is.na(x[start,1]) & !is.na(x[jj,1]) & x[jj,1]==x[start,1]) | (is.na(x[start,1]) & is.na(x[jj,1]))) {
-          if(jj<n){ jj <- jj+1 }
+    subtrees <- list()
+    # start to iterate among rows
+    while(rowIndexIter <= n){
+        # find start row index and end row index of a cluster
+        # record starting row index of a cluster
+        clusterStartRowIndex <- rowIndexIter
+        # initialize clusterEndRowIndex
+        clusterEndRowIndex <- rowIndexIter
+        # iterate if treeMatrix[clusterEndRowIndex,1] and treeMatrix[clusterStartRowIndex,1] have same value
+        # have to deal with situation with NA values
+        # in front of 'or' deal with non-NA situation 
+        # after 'or' deal with NA situation
+        while ((!is.na(treeMatrix[clusterStartRowIndex,1]) & 
+                !is.na(treeMatrix[clusterEndRowIndex,1]) & 
+                treeMatrix[clusterEndRowIndex,1]==treeMatrix[clusterStartRowIndex,1]) |
+                (is.na(treeMatrix[clusterStartRowIndex,1]) & is.na(treeMatrix[clusterEndRowIndex,1]))) {
+          if(clusterEndRowIndex<n){ clusterEndRowIndex <- clusterEndRowIndex + 1 }
           else{ break }
         }
-        if(jj==n){ jj <- jj+1 }
-        right <- left + (jj-start)/n*(xright - xleft)
-        lambda <- .2
+        if(clusterEndRowIndex==n){ clusterEndRowIndex <- clusterEndRowIndex + 1 }
+        # assign right border of rectangle region
+        # length of right border - left border is proportional to (clusterEndRowIndex - clusterStartRowIndex)
+        rightBorderRectangleRegion <- leftBorderRectangleRegion + 
+                                      (clusterEndRowIndex-clusterStartRowIndex)/n*(rightBorderPlotRegion - leftBorderPlotRegion)
+        
         # find x,y coordinates of the rectangle
         xl <- xleft+left+lambda*(right-left)
         yb <- ybottom+lambda*(ytop-ybottom)
@@ -292,7 +336,7 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
       }
     result <- list(treeMatrix = x, rectangles = rectangles, labels = labels, lines = lines, 
       is.runts = is.runts, subtree = subtree, n_branches = length(rectangles))
-    class(result) <- c("clusterTreeDensityPlot", class(result))
+    class(result) <- c("clusterTreePlotInfo", class(result))
     result
   }
   else{
@@ -327,7 +371,7 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
         }
         labels[[length(labels)+1]] <- labels_tmp
         subtree_tmp <- clusterTreeToClusterTreeDensityPlotHelper(x = as.matrix(x[start:(jj-1),2:dim(x)[2]]),
-                                            xleft = xleft+left, 
+                                            leftBorderPlotRegion = xleft+left, 
                                             ybottom = ybottomupdate, 
                                             xright = xleft+right, 
                                             ytop = ytop, 
@@ -346,7 +390,7 @@ clusterTreeToClusterTreeDensityPlotHelper <- function(x, xleft, ybottom, xright,
       }
     result <- list(treeMatrix = x, rectangles = rectangles, labels = labels, lines = lines, 
       is.runts = is.runts, subtree = subtree, n_branches = length(rectangles))
-    class(result) <- c("clusterTreeDensityPlot", class(result))
+    class(result) <- c("clusterTreePlotInfo", class(result))
     result
   }
 }
@@ -457,7 +501,7 @@ getBranchInfo <- function(x, layer = 1){
 #' res2 <- clusterTreeToClusterTreeDensityPlot(res)
 #' plot(res2)
 #' @export 
-plot.clusterTreeDensityPlot <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
+plot.clusterTreePlotInfo <- function(x, y = NULL, labels = NULL, axes = TRUE, frame.plot = FALSE, ann = TRUE, 
                              main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL, ylab = "Height",
                              col = NULL, labels.cex =1, labels.col = NULL,  ...){
   if (!is.null(y)) warning("argument y is ignored")

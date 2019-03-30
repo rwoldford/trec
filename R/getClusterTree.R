@@ -1,4 +1,4 @@
-#' Transform all data structures into BranchComponent
+#' Transform all data structures into clusterTree
 #'
 #' @param x data structure output by some clustering method 
 #' (e.g. hclust, kmeans, dbscan, etc.)

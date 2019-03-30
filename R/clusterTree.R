@@ -282,44 +282,83 @@ combineClusterings <- function(clustering1, clustering2,
 }
 
 
-#' reorder rows of tree attribute of clusterTree object
+#' reorder rows of treeMatrix attribute of clusterTree so that data points 
+#' that belong to the same cluster are always next to each other. This will
+#' help us process the plot function
 #' @param x is the tree attribute of clusterTree object
-#' @param labels labels is the order of rows of x
-#' @return an order which simplies the process of plotting dendogram/density plot
+#' @param order order is the inital order of rows of x, default is c(1:n)
+#' @return an order which data points belong to same cluster are
+#' always next to each other
+#' @examples
+#' data <- iris[,1:4]
+#' clustering1 <- stats::hclust(dist(data),method='single')
+#' clustering2 <- kmeans(data,centers=3)
+#' clustering3 <- dbscan::dbscan(data,eps=.78)
+#' res <- combineClusterings(clustering1,clustering2,clustering3) 
+#' # obtain the order for reordering cluster tree
+#' order <- reOrderClusterTreeMatrix(res$treeMatrix)
+#' # After reordering, data points with same cluster id are always next
+#' # to each other
+#' reordered_treeMatrix <- res$treeMatrix[order,]
+#' # check reordered_treeMatrix
+#' reordered_treeMatrix
 #' @export
-reOrderClusterTreeMatrix <- function(x,labels=NULL)
+reOrderClusterTreeMatrix <- function(treeMatrix,order=NULL)
 {
-  if(!is.matrix(x))
+  # reordering is implemented recursively
+  # for each function call, the first column of treeMatrix is reordered correctly
+  # then a recursive call is applied to treeMatrix except for the first column to 
+  # reorder the rest of the matrix 
+  if(!is.matrix(treeMatrix))
     stop('input must be a matrix!')
-  n <- dim(x)[1]
-  if(is.null(labels)){ labels <- c(1:n) }
-  if(!is.vector(labels)){ stop("labels are not a vector!") }
-  if(!is.matrix(x)){ stop("input is not a matrix!") }
-  if(dim(x)[2]==1){
-    IDs <- unique(x)
+  n <- nrow(treeMatrix)
+  if(is.null(order)){ order <- c(1:n) }
+  if(!is.vector(order)){ stop("order are not a vector!") }
+  if(!is.matrix(treeMatrix)){ stop("input is not a matrix!") }
+  if(ncol(treeMatrix)==1){
+    # check all unique ids in treeMatrix
+    IDs <- unique(treeMatrix)
+    # find all unique ids that is not NA
     IDs <- IDs[!is.na(IDs)]
-    res <- c()
-    for (id in IDs) {
-      tmp <- (x[,1]==id) & (!is.na(x[,1]))
-      res<-c(res,labels[tmp])
-    }
-    res <- c(res,labels[is.na(x[,1])])
-    res
+    groupIndexWithSameId(treeMatrix = treeMatrix, IDs = IDs,initialOrder = order)
   }
   else{
-    IDs <- unique(x[,1])
+    # find all IDs in first column
+    IDs <- unique(treeMatrix[,1])
+    # find all non-NA IDs
     IDs <- IDs[!is.na(IDs)]
     res <- c()
     for (id in IDs) {
-      tmp <- (x[,1]==id) & (!is.na(x[,1]))
-      tmpx <- as.matrix(x[tmp,][,2:dim(x)[2]])
-      tmplabels <- labels[tmp]
-      res <- c(res,reOrderClusterTreeMatrix(tmpx,tmplabels))
+      # find Indexes that belong to same cluster
+      IndexesWithSameIds <- (treeMatrix[,1]==id) & (!is.na(treeMatrix[,1]))
+      # form treeMatrix and order for recursive calls
+      recursiveTreeMatrix <- as.matrix(treeMatrix[IndexesWithSameIds,][,2:dim(treeMatrix)[2]])
+      recursiveOrder <- order[IndexesWithSameIds]
+      # call this function recursively to get order for next level
+      # add recursive answers into the result
+      res <- c(res,reOrderClusterTreeMatrix(recursiveTreeMatrix,recursiveOrder))
     }
-    res <- c(res,labels[is.na(x[,1])])
+    # add indexes that corresponds to NAs in the end
+    res <- c(res,order[is.na(treeMatrix[,1])])
     res
   }
 }
 
-
+#' group index with same id in first column of treeMatrix
+#' @param treeMatrix treeMatrix attribute of cluster tree
+#' @param IDs cluster id in treeMatrix
+#' @param initialOrder  initialOrder is the initial order of treeMatrix
+groupIndexWithSameId <- function(treeMatrix,IDs, initialOrder){
+  # group index with same id in first column of treeMatrix
+  # together and form a vector
+  indexes <- c()
+  for (id in IDs) {
+    # group all indexes which corresponds to the current id together
+    # note NA values will be processed at the end to avoid error
+    indexesGroup <- (treeMatrix[,1]==id) & (!is.na(treeMatrix[,1]))
+    indexes <- c(indexes, initialOrder[indexesGroup])
+  }
+  indexes <- c(indexes, initialOrder[is.na(treeMatrix[,1])])
+  indexes
+}
 
