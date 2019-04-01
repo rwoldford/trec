@@ -271,8 +271,8 @@ clusterTreeToClusterTreePlotInfoRecursiveHelper <- function(treeMatrix, leftBord
   # target of this function is to generate plot info of treeMatrix recursively
   # plot info includes treeMatrix, rectangles, labels, lines, is.runts, subtrees, numBranches
   # there is a correspondance relation between plot info, which is:
-  # rectangles[[1]] <-> labels[[1]] <-> lines[[1]] <-> is.runts[[1]] <-> subtrees[[1]]
-  # rectangles[[2]] <-> labels[[2]] <-> lines[[2]] <-> is.runts[[2]] <-> subtrees[[2]], etc...
+  # rectangles[[1]] <-> labels[[1]] <-> lines[[1]] <-> is.runts[[1]] <-> subtrees[[1]] <-> 'first branch'
+  # rectangles[[2]] <-> labels[[2]] <-> lines[[2]] <-> is.runts[[2]] <-> subtrees[[2]] <-> 'second branch', etc...
   # function is implemented recursively
   n <- nrow(treeMatrix)
   # if ncol(treeMatrix) is 1, build plot info directly, and return
@@ -407,10 +407,14 @@ clusterTreeToClusterTreePlotInfoRecursiveHelper <- function(treeMatrix, leftBord
         subtreeRectangles <- subtree$rectangles
         # collect lines info for this particular subtree
         subtreeLines <- list()
+        # for each rectangle in subtree, create a line
         for (j in 1:length(subtreeRectangles)) {
+          # extract jth rectangle in subtree
           cur_rectangle <- subtreeRectangles[[j]]
+          # add a line that links current rectangle to jth rectangle in subtree
           subtreeLines[[length(subtreeLines)+1]] <- list(start = list(x = (leftBorderRectangleRegion+rightBorderRectangleRegion)/2.0, y = rectangle$top), end = list(x = (cur_rectangle$left + cur_rectangle$right)/2.0, y = cur_rectangle$bottom))
         }
+        # add this group of lines to list
         lines[[length(lines)+1]] <- subtreeLines
         # add is.runts information to list
         is.runts[[length(is.runts)+1]] <- is.na(treeMatrix[clusterStartRowIndex,1])
@@ -584,8 +588,7 @@ plot.clusterTreePlotInfo <- function(x, y = NULL, labels = NULL, axes = TRUE, fr
   # plot clusterTreeDensityPlot recursively
   graphics::plot.new()
   plotClusterTreePlotInfoRecursiveHelper(x = x, labels.plot = labels.plot, labels = labels, col = col, 
-                                  labels.cex = 2*labels.cex/ncol(x$treeMatrix), labels.col = if (length (labels.col) == length(labels)){
-                                                           labels.col[order]}else{labels.col})
+                                  labels.cex = 2*labels.cex/ncol(x$treeMatrix), labels.col = labels.col)
   ###
   ###
   if(frame.plot){
@@ -606,43 +609,57 @@ plot.clusterTreePlotInfo <- function(x, y = NULL, labels = NULL, axes = TRUE, fr
 #' helper function to plot a clusterTreeDensityPlot object
 #' @param x a clusterTreeDensityPlot object
 #' @param labels.plot whether to plot labels
-#' @param labels of data points
+#' @param labels labels of data points
 #' @param col color of rectangles
 #' @param labels.cex cex of labels
 #' @param labels.col color of labels 
 plotClusterTreePlotInfoRecursiveHelper <- function(x, labels.plot, labels, col, 
                                   labels.cex, labels.col){
-  for (ii in c(1:x$numBranches)) {
-    if(!x$is.runts[[ii]]){
-      graphics::rect(x$rectangles[[ii]]$left, x$rectangles[[ii]]$bottom,
-        x$rectangles[[ii]]$right, x$rectangles[[ii]]$top, col = col)
-      if(length(x$lines[[ii]])>0){
-        for (jj in c(1:length(x$lines[[ii]]))) {
-          if(!x$subtree[[ii]]$is.runts[[jj]]){
-            graphics::segments(x0 = x$lines[[ii]][[jj]]$start$x,
-              y0 = x$lines[[ii]][[jj]]$start$y,
-              x1 = x$lines[[ii]][[jj]]$end$x,
-              y1 = x$lines[[ii]][[jj]]$end$y)
+  # iterate through along each branches to plot rectangles, lines, etc
+  for (i in c(1:x$numBranches)) {
+    # only plot if it is not a runt
+    if(!x$is.runts[[i]]){
+      graphics::rect(x$rectangles[[i]]$left, x$rectangles[[i]]$bottom,
+        x$rectangles[[i]]$right, x$rectangles[[i]]$top, col = col)
+      # if there exists ith group of lines to plot
+      # note x$lines[i] corresponds to ith group of lines between ith rectangle and its bracnches,
+      # not ith lines
+      if(length(x$lines[[i]])>0){
+        # plot jth lines in ith group of lines, note this line links ith rectangle and jth branch of ith rectangle
+        for (j in c(1:length(x$lines[[i]]))) {
+          # only plot a line if jth branch of ith subtree is not a runt
+          if(!x$subtree[[i]]$is.runts[[j]]){
+            graphics::segments(x0 = x$lines[[i]][[j]]$start$x,
+              y0 = x$lines[[i]][[j]]$start$y,
+              x1 = x$lines[[i]][[j]]$end$x,
+              y1 = x$lines[[i]][[j]]$end$y)
           }
         }
       }
+      # if we need to plot labels
       if(labels.plot){
-        if(length(x$labels[[ii]])>0){
-          for (jj in c(1:length(x$labels[[ii]]))) {
-            graphics::text(x = x$labels[[ii]][[jj]]$x,
-                           y = x$labels[[ii]][[jj]]$y,
-                           labels = labels[x$labels[[ii]][[jj]]$index],
+        # if number of group of labels is greater than 0
+        if(length(x$labels[[i]])>0){
+          # note x$labels[i][j] represents jth labels in ith group of labels
+          # ith group of labels represent ith rectangle in this layer
+          # jth labels represent jth labels in ith rectangle
+          for (j in c(1:length(x$labels[[i]]))) {
+            graphics::text(x = x$labels[[i]][[j]]$x,
+                           y = x$labels[[i]][[j]]$y,
+                           labels = labels[x$labels[[i]][[j]]$index],
                            cex = labels.cex, 
-                           col = labels.col[x$labels[[ii]][[jj]]$index],
+                           col = labels.col[x$labels[[i]][[j]]$index],
                            srt = 90)
           }
         }
       }
     }
   }
+  # if subtrees exist
   if(length(x$subtrees)>0){
-    for (ii in c(1:length(x$subtrees))) {
-      plotClusterTreePlotInfoRecursiveHelper(x$subtree[[ii]], labels.plot = labels.plot,
+    for (i in c(1:length(x$subtrees))) {
+      # call recursive function to plot
+      plotClusterTreePlotInfoRecursiveHelper(x$subtree[[i]], labels.plot = labels.plot,
                                        labels = labels, col = col, 
                                        labels.cex = labels.cex, labels.col = labels.col)
     }
