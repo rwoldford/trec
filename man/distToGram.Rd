@@ -2,24 +2,48 @@
 % Please edit documentation in R/distance.R
 \name{distToGram}
 \alias{distToGram}
-\title{transform clusDist object to Gram matrix}
+\title{transform dist object to Gram matrix}
 \usage{
 distToGram(x)
 }
 \arguments{
-\item{x}{a clusDist object}
+\item{x}{a dist object}
 }
 \description{
-transform clusDist object to Gram matrix
+transform dist object to Gram matrix
 }
 \examples{
+data <- rnorm(300, nrow =100)
+distance <- dist(data)
+g <- distToGram(distance)
+m <- as.matrix(scale(data, center = TRUE, scale = FALSE) )
+g2 <- m \%*\% t(m)
+round(sum(g - g2), 7)
+
+# Using the between cluster distances
+set.seed(3141593)
 data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               matrix(rnorm(100, mean = 0, sd = 1), nrow = 50),
-              matrix(rnorm(100, mean = -10, sd = 3), nrow = 50)
-              )
+              matrix(rnorm(100, mean = -10, sd = 3), nrow = 50))
+              
 clustering1 <- stats::hclust(dist(data),method='single')
 clustering2 <- kmeans(data,centers=3)
 clustering3 <- dbscan::dbscan(data,eps=.8)
-distance <- clusDist(clustering1,clustering2,clustering3)
-res <- distToGram(distance)
+clustering4 <- mclust::Mclust(data)
+distance <- clusDist(clustering1,clustering2,
+                     clustering3, clustering4)
+distance
+gram <- distToGram(distance)
+decomp <- eigen(gram)
+evals <- eigen(gram)$values
+coords <- eigen(gram)$vectors
+savePar <- par(mfrow = c(1,2))
+plot(evals/max(evals), type ="b", ylab = "contribution",
+     main = "Contributions to dimensionality",
+     sub = "Only two dimensions needed")
+plot(coords[, 1:2], pch = 0:3, cex = 3,
+     xlab = "Var 1", ylab = "Var 2",
+     main = "Comparing clusters in cluster space",
+     sub = "kmeans and model based agree")
+par(savePar)
 }

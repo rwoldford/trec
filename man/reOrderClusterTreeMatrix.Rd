@@ -2,18 +2,37 @@
 % Please edit documentation in R/clusterTree.R
 \name{reOrderClusterTreeMatrix}
 \alias{reOrderClusterTreeMatrix}
-\title{reorder rows of tree attribute of clusterTree object}
+\title{reorder rows of treeMatrix attribute of clusterTree so that data points 
+that belong to the same cluster are always next to each other. This will
+help us process the plot function}
 \usage{
-reOrderClusterTreeMatrix(x, labels = NULL)
+reOrderClusterTreeMatrix(treeMatrix, order = NULL)
 }
 \arguments{
-\item{x}{is the tree attribute of clusterTree object}
+\item{order}{order is the inital order of rows of x, default is c(1:n)}
 
-\item{labels}{labels is the order of rows of x}
+\item{x}{is the tree attribute of clusterTree object}
 }
 \value{
-an order which simplies the process of plotting dendogram/density plot
+an order which data points belong to same cluster are
+always next to each other
 }
 \description{
-reorder rows of tree attribute of clusterTree object
+reorder rows of treeMatrix attribute of clusterTree so that data points 
+that belong to the same cluster are always next to each other. This will
+help us process the plot function
+}
+\examples{
+data <- iris[,1:4]
+clustering1 <- stats::hclust(dist(data),method='single')
+clustering2 <- kmeans(data,centers=3)
+clustering3 <- dbscan::dbscan(data,eps=.78)
+res <- combineClusterings(clustering1,clustering2,clustering3) 
+# obtain the order for reordering cluster tree
+order <- reOrderClusterTreeMatrix(res$treeMatrix)
+# After reordering, data points with same cluster id are always next
+# to each other
+reordered_treeMatrix <- res$treeMatrix[order,]
+# check reordered_treeMatrix
+reordered_treeMatrix
 }
