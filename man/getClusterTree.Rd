@@ -2,7 +2,7 @@
 % Please edit documentation in R/getClusterTree.R
 \name{getClusterTree}
 \alias{getClusterTree}
-\title{Transform all data structures into BranchComponent}
+\title{Transform all data structures into clusterTree}
 \usage{
 getClusterTree(x)
 }
@@ -15,7 +15,7 @@ a matrix providing the mapping
 between data points and cluster id.
 }
 \description{
-Transform all data structures into BranchComponent
+Transform all data structures into clusterTree
 }
 \examples{
 x <- kmeans(matrix(rnorm(100),nrow=50),centers=3)
