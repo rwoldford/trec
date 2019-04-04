@@ -214,24 +214,18 @@ getClusterTree.CoClust <- function(x)
 #' @export
 getClusterTree.dbscan_fast <- function(x)
 {
-    tmp <- x$cluster
-    cl<-max(tmp)+1
-    for (ii in 1:length(tmp)) {
-        if(tmp[ii]==0){
-            tmp[ii]<-cl
-            cl <- cl+1
-        }
-    }
-    x<-as.matrix(tmp)
-    tree <- matrixToClusterTree(x)
-    tree
+  matrixToClusterTree(as.matrix(x$cluster))
 }
 
+getClusterTree.dbscan <- function(x)
+{
+  matrixToClusterTree(as.matrix(x$cluster))
+}
 
 ## densityClust package ##
 #' @export
 getClusterTree.densityCluster <- function(x){
-  tree <- matrixToClusterTree(x$clusters)
+  matrixToClusterTree(x$clusters)
 }
 
 ## Fclust package  ##
