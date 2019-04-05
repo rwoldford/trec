@@ -13,7 +13,7 @@ distToGram(x)
 transform dist object to Gram matrix
 }
 \examples{
-data <- rnorm(300, nrow =100)
+data <- matrix(data = rnorm(300),nrow = 100)
 distance <- dist(data)
 g <- distToGram(distance)
 m <- as.matrix(scale(data, center = TRUE, scale = FALSE) )
@@ -29,7 +29,8 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
 clustering1 <- stats::hclust(dist(data),method='single')
 clustering2 <- kmeans(data,centers=3)
 clustering3 <- dbscan::dbscan(data,eps=.8)
-clustering4 <- mclust::Mclust(data)
+library(mclust)
+clustering4 <- Mclust(data)
 distance <- clusDist(clustering1,clustering2,
                      clustering3, clustering4)
 distance

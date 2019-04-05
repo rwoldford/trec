@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot.R
 \name{showLines}
 \alias{showLines}
-\title{show coordinates of lines in clusterTreeDensityPlot object}
+\title{show coordinates of lines in clusterTreePlotInfo object}
 \usage{
 showLines(x)
 }
 \arguments{
-\item{x}{a clusterTreeDensityPlot object}
+\item{x}{a clusterTreePlotInfo object}
 }
 \value{
 a list of lines' coordinates
 }
 \description{
-show coordinates of lines in clusterTreeDensityPlot object
+show coordinates of lines in clusterTreePlotInfo object
 }

@@ -9,9 +9,9 @@ help us process the plot function}
 reOrderClusterTreeMatrix(treeMatrix, order = NULL)
 }
 \arguments{
-\item{order}{order is the inital order of rows of x, default is c(1:n)}
+\item{treeMatrix}{is the treeMatrix attribute of clusterTree object}
 
-\item{x}{is the tree attribute of clusterTree object}
+\item{order}{order is the inital order of rows of x, default is c(1:n)}
 }
 \value{
 an order which data points belong to same cluster are

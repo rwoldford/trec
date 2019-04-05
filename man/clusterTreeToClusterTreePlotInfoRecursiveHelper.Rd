@@ -23,9 +23,8 @@ clusterTreeToClusterTreePlotInfoRecursiveHelper(treeMatrix,
 \item{topBorderPlotRegion}{coordinate of the plot region's top border on (0,1)*(0,1) canvas}
 
 \item{labels_index}{index of labels to paste in each appropriate position}
-}
-\value{
 
+\item{padding}{padding of rectangle in rectangle plot region}
 }
 \description{
 a function to help organize plot info for clusterTree in a recursive fashion

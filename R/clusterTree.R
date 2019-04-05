@@ -293,7 +293,7 @@ combineClusterings <- function(clustering1, clustering2,
 #' reorder rows of treeMatrix attribute of clusterTree so that data points 
 #' that belong to the same cluster are always next to each other. This will
 #' help us process the plot function
-#' @param x is the tree attribute of clusterTree object
+#' @param treeMatrix is the treeMatrix attribute of clusterTree object
 #' @param order order is the inital order of rows of x, default is c(1:n)
 #' @return an order which data points belong to same cluster are
 #' always next to each other
