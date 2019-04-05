@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot.R
 \name{showLabels}
 \alias{showLabels}
-\title{show coordinates of labels in clusterTreeDensityPlot object}
+\title{show coordinates of labels in clusterTreePlotInfo object}
 \usage{
 showLabels(x)
 }
 \arguments{
-\item{x}{a clusterTreeDensityPlot object}
+\item{x}{a clusterTreePlotInfo object}
 }
 \value{
 a list of labels' coordinates
 }
 \description{
-show coordinates of labels in clusterTreeDensityPlot object
+show coordinates of labels in clusterTreePlotInfo object
 }

@@ -49,7 +49,7 @@ clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
 #' transform dist object to Gram matrix
 #' @param x a dist object
 #' @examples 
-#' data <- rnorm(300, nrow =100)
+#' data <- matrix(data = rnorm(300),nrow = 100)
 #' distance <- dist(data)
 #' g <- distToGram(distance)
 #' m <- as.matrix(scale(data, center = TRUE, scale = FALSE) )
@@ -65,7 +65,8 @@ clusDist <- function(clustering1, clustering2, ..., diag = FALSE, upper = FALSE)
 #' clustering1 <- stats::hclust(dist(data),method='single')
 #' clustering2 <- kmeans(data,centers=3)
 #' clustering3 <- dbscan::dbscan(data,eps=.8)
-#' clustering4 <- mclust::Mclust(data)
+#' library(mclust)
+#' clustering4 <- Mclust(data)
 #' distance <- clusDist(clustering1,clustering2,
 #'                      clustering3, clustering4)
 #' distance

@@ -7,7 +7,9 @@
 getBranchInfo(x, layer = 1)
 }
 \arguments{
-\item{x}{a clusterTreeDensityPlot object}
+\item{x}{a clusterTreePlotInfo object}
+
+\item{layer}{layer to check}
 }
 \value{
 a list which contains plot information

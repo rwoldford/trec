@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot.R
 \name{showTreeMatrix}
 \alias{showTreeMatrix}
-\title{show treeMatrix of clusterTreeDensityPlot object}
+\title{show treeMatrix of clusterTreePlotInfo object}
 \usage{
 showTreeMatrix(x)
 }
 \arguments{
-\item{x}{a clusterTreeDensityPlot object}
+\item{x}{a clusterTreePlotInfo object}
 }
 \value{
 a matrix, represents treeMatrix
 }
 \description{
-show treeMatrix of clusterTreeDensityPlot object
+show treeMatrix of clusterTreePlotInfo object
 }

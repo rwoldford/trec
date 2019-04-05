@@ -2,8 +2,8 @@
 % Please edit documentation in R/plot.R
 \name{clusterTreeToClusterTreePlotInfo}
 \alias{clusterTreeToClusterTreePlotInfo}
-\title{transform a clusterTree object into a clusterTreeDensityPlot object
-clusterTreeDensityPlot object is a unified data structure for recording information
+\title{transform a clusterTree object into a clusterTreePlotInfo object
+clusterTreePlotInfo object is a unified data structure for recording information
 related to plotting clusterTree object}
 \usage{
 clusterTreeToClusterTreePlotInfo(x, padding = 0.2)
@@ -14,9 +14,9 @@ clusterTreeToClusterTreePlotInfo(x, padding = 0.2)
 \item{padding}{padding must have a value between 0 and 1, representing the proportion of space}
 }
 \value{
-a clusterTreeDensityPlot object
+a clusterTreePlotInfo object
 
-clusterTreeDensityPlot is a nested structure which record information for
+clusterTreePlotInfo is a nested structure which record information for
 
 plotting clusterTree 
 \item{tree}{a matrix, tree attribute of clusterTree object that remains to be plotted}
@@ -27,8 +27,8 @@ plotting clusterTree
 \item{subtree}{a list of subtree, each element represents the nested subtree of corresponding rectangle}
 }
 \description{
-transform a clusterTree object into a clusterTreeDensityPlot object
-clusterTreeDensityPlot object is a unified data structure for recording information
+transform a clusterTree object into a clusterTreePlotInfo object
+clusterTreePlotInfo object is a unified data structure for recording information
 related to plotting clusterTree object
 }
 \examples{
@@ -40,5 +40,5 @@ clustering1<-stats::hclust(dist(data),method='single')
 clustering2<-kmeans(data,centers=3)
 clustering3<-dbscan::dbscan(data,eps=.1)
 clusterTree <- combineClusterings(clustering1,clustering2,clustering3)
-res <- clusterTreeToClusterTreeDensityPlot(clusterTree)
+res <- clusterTreeToClusterTreePlotInfo(clusterTree)
 }

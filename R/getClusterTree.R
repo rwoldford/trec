@@ -53,8 +53,7 @@ getClusterTree.chac <- function(x)
 getClusterTree.adpclust <- function(x)
 {
     x <- as.matrix(x$clusters)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ## afCEC package
@@ -62,8 +61,7 @@ getClusterTree.adpclust <- function(x)
 getClusterTree.afCEC <- function(x)
 {
     x<-as.matrix(x$labels)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ## apcluster package
@@ -71,8 +69,7 @@ getClusterTree.afCEC <- function(x)
 getClusterTree.apcluster <- function(x)
 {
     x<-as.matrix(x)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 #' @export
 getClusterTree.AggExResul <- function(x)
@@ -100,8 +97,7 @@ getClusterTree.bclustvs <- function(x)
 getClusterTree.ccfkms <- function(x)
 {
     x<-as.matrix(x$cl)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ## package cclust
@@ -109,8 +105,7 @@ getClusterTree.ccfkms <- function(x)
 getClusterTree.cclust <- function(x)
 {
     x <- as.matrix(x$cluster)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ##  package CEC
@@ -118,8 +113,7 @@ getClusterTree.cclust <- function(x)
 getClusterTree.cec <- function(x)
 {
     x<-as.matrix(x$cluster)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ####  package Ckmeans.1d.dp  #### TO DO
@@ -127,8 +121,7 @@ getClusterTree.cec <- function(x)
 getClusterTree.Ckmeans.1d.dp <- function(x)
 {
     x<-as.matrix(x$cluster)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ##  package clues
@@ -136,8 +129,7 @@ getClusterTree.Ckmeans.1d.dp <- function(x)
 getClusterTree.clues <- function(x)
 {
     x<-as.matrix(x$mem)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ## package cluster
@@ -151,8 +143,7 @@ getClusterTree.agnes <- function(x)
 getClusterTree.clara <- function(x)
 {
     x<-as.matrix(x$clustering)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 #' @export
@@ -165,16 +156,14 @@ getClusterTree.diana <- function(x)
 getClusterTree.fanny <- function(x)
 {
     x<-as.matrix(x$clustering)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 #' @export
 getClusterTree.pam <- function(x)
 {
     x<-as.matrix(x$clustering)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x)
 }
 
 ## ClusterR package  TODO
@@ -214,33 +203,21 @@ getClusterTree.CoClust <- function(x)
 #' @export
 getClusterTree.dbscan_fast <- function(x)
 {
-    tmp <- x$cluster
-    cl<-max(tmp)+1
-    for (ii in 1:length(tmp)) {
-        if(tmp[ii]==0){
-            tmp[ii]<-cl
-            cl <- cl+1
-        }
-    }
-    x<-as.matrix(tmp)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(x$cluster)
 }
 
 
 ## densityClust package ##
 #' @export
 getClusterTree.densityCluster <- function(x){
-  tree <- matrixToClusterTree(x$clusters)
+  matrixToClusterTree(x$clusters)
 }
 
 ## Fclust package  ##
 #' @export
 getClusterTree.fclust <- function(x)
 {
-    x <- as.matrix(x$clus)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(as.matrix(x$clus))
 }
 
 ##  hierarchical based clustering
@@ -254,26 +231,20 @@ getClusterTree.hclust <- function(x)
 #' @export
 getClusterTree.specc <- function(x)
 {
-    x<-as.matrix(x@.Data)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(as.matrix(x@.Data))
 }
 
 ## kmeans package
 #' @export
 getClusterTree.kmeans <- function(x)
 {
-    x<-as.matrix(x$cluster)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(as.matrix(x$cluster))
 }
 
 ##  mixture based clustering
 #' @export
 getClusterTree.Mclust <- function(x)
 {
-    x<-as.matrix(x$classification)
-    tree <- matrixToClusterTree(x)
-    tree
+    matrixToClusterTree(as.matrix(x$classification))
 }
 

@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot.R
 \name{showRectangles}
 \alias{showRectangles}
-\title{show coordinates of rectangles in clusterTreeDensityPlot object}
+\title{show coordinates of rectangles in clusterTreePlotInfo object}
 \usage{
 showRectangles(x)
 }
 \arguments{
-\item{x}{a clusterTreeDensityPlot object}
+\item{x}{a clusterTreePlotInfo object}
 }
 \value{
 a list of rectangle coordinates
 }
 \description{
-show coordinates of rectangles in clusterTreeDensityPlot object
+show coordinates of rectangles in clusterTreePlotInfo object
 }

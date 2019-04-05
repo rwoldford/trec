@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot.clusterTreePlotInfo}
 \alias{plot.clusterTreePlotInfo}
-\title{plot a clusterTreeDensityPlot object}
+\title{plot a clusterTreePlotInfo object}
 \usage{
 \method{plot}{clusterTreePlotInfo}(x, y = NULL, labels = NULL,
   axes = TRUE, frame.plot = FALSE, ann = TRUE,
@@ -43,7 +43,7 @@
 No return value
 }
 \description{
-plot a clusterTreeDensityPlot object
+plot a clusterTreePlotInfo object
 }
 \examples{
 data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
@@ -52,8 +52,8 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               )
 clustering1<-stats::hclust(dist(data),method='single')
 clustering2<-kmeans(data,centers=3)
-clustering3<-dbscan::dbscan(data,eps=.1)
+clustering3<-dbscan::dbscan(data,eps=.8)
 res <- combineClusterings(clustering1,clustering2,clustering3)
-res2 <- clusterTreeToClusterTreeDensityPlot(res)
+res2 <- clusterTreeToClusterTreePlotInfo(res)
 plot(res2)
 }
