@@ -182,7 +182,8 @@ combineClusterings <- function(clustering1, clustering2,
     clustering<-cbind(clustering,clusterTrees[[2]]$treeMatrix)  
   }
   clustering[is.na(clustering)] <- 0
-  
+  if(sum(clustering!=0) == 0)
+    stop('at least one entry of clustering result must be nonzero')
   clusteringsum <- array(0,dim = c(n,n))
   for(j in 2:n)
   {
@@ -193,7 +194,6 @@ combineClusterings <- function(clustering1, clustering2,
                                   (clustering[j,]==clustering[k,]))
     }
   }
-  
   distance <- stats::as.dist(clusteringsum)
   singlelinkage <- stats::hclust(-distance, method = "single")
   merge <- singlelinkage$merge
