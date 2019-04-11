@@ -179,7 +179,7 @@ combineClusterings <- function(clustering1, clustering2,
   clustering<-clusterTrees[[1]]$treeMatrix
   for(i in 2:length(clusterTrees))
   {
-    clustering<-cbind(clustering,clusterTrees[[2]]$treeMatrix)  
+    clustering<-cbind(clustering,clusterTrees[[i]]$treeMatrix)  
   }
   clustering[is.na(clustering)] <- 0
   if(sum(clustering!=0) == 0)
