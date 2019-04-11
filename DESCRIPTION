@@ -27,4 +27,4 @@ LazyData: true
 RoxygenNote: 6.1.1
 Suggests: testthat, knitr, rmarkdown
 VignetteBuilder: knitr
-Imports: mclust,dbscan,graphics
+Imports: mclust,dbscan,graphics,base,methods

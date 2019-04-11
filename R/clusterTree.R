@@ -163,7 +163,7 @@ combineClusterings <- function(clustering1, clustering2,
                                ..., labels = NULL) {
   if (missing(clustering1)) stop("Must provide output of clustering for first argument")
   if (missing(clustering2)){
-    if (!is(clustering1, "clusterings")) {
+    if (!methods::is(clustering1, "clusterings")) {
       stop(paste("Either clustering1 is a list of clusterings of class `clusterings`",
                  "or at least one more clustering must be provided."))
     } else {
