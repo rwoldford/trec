@@ -160,7 +160,7 @@ mergeToMatrix <- function( merge ) {
 #' 
 #' @export
 combineClusterings <- function(clustering1, clustering2, 
-                               ..., labels = NULL) {
+                               ..., labels = NULL, weights = NULL) {
   if (missing(clustering1)) stop("Must provide output of clustering for first argument")
   if (missing(clustering2)){
     if (!methods::is(clustering1, "clusterings")) {
@@ -172,7 +172,12 @@ combineClusterings <- function(clustering1, clustering2,
   } else {
     clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
   }
-  
+  if(is.null(weights)){
+    weights <- rep(1,length(list(clustering1,clustering2, ...)))
+  }
+  if(length(weights)!=length(list(clustering1,clustering2, ...))){
+    stop('length of weights and length of clusterings do not match!')
+  }
   # n is number of data points
   n <- nrow(clusterTrees[[1]]$treeMatrix)
   # combine clusterTrees
@@ -189,9 +194,9 @@ combineClusterings <- function(clustering1, clustering2,
   {
     for(k in 1:(j-1))
     {
-      clusteringsum[j,k] <- sum((clustering[j,]!=0)&
+      clusteringsum[j,k] <- sum((weights)*((clustering[j,]!=0)&
                                   (clustering[k,]!=0)&
-                                  (clustering[j,]==clustering[k,]))
+                                  (clustering[j,]==clustering[k,])))
     }
   }
   distance <- stats::as.dist(clusteringsum)
