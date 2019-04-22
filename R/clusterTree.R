@@ -66,7 +66,7 @@ mergeToMatrix <- function( merge ) {
   # assign clusterId based on verticeSets
   componentSets <- array(0,dim=c(m,n))
   # record which layer each data point belongs to 
-  layerSet <- array(0,dim=c(m,1))
+  layerHeight <- array(0,dim=c(m,1))
   
   # get the corresponding vertices set for each row in merge
   for (i in 1:m) {
@@ -92,7 +92,7 @@ mergeToMatrix <- function( merge ) {
   for (i in m:1) {
     index <- i
     if (i==m) {
-      layerSet[i] <- 1
+      layerHeight[i] <- 1
     }
     componentId <- 1
     
@@ -104,7 +104,7 @@ mergeToMatrix <- function( merge ) {
         componentId <- componentId + 1
       }
       if (getValue > 0) {
-        layerSet[getValue] <- layerSet[i] + 1
+        layerHeight[getValue] <- layerHeight[i] + 1
         k <- 1
         while (verticesSets[getValue,k] != 0) {
           index2 <- verticesSets[getValue,k]
@@ -118,14 +118,14 @@ mergeToMatrix <- function( merge ) {
     }
   }
   
-  branchComponentFamily <- array(0, dim=c(n,max(layerSet)+1))
+  branchComponentFamily <- array(0, dim=c(n,max(layerHeight)+1))
   branchComponentFamily[,1] <- rep(1,n)
   
   # get all the components for each layer of the dendrogram, and then form the branch component family
-  for (i in 1:max(layerSet)) {
+  for (i in 1:max(layerHeight)) {
     clusterId <- 0
     for (j in 1:m) {
-      if (layerSet[j] == i) {
+      if (layerHeight[j] == i) {
         for (k in 1:n) {
           if (componentSets[j,k] > 0) {
             branchComponentFamily[k,i+1] <- clusterId + componentSets[j,k]
@@ -181,7 +181,7 @@ combineClusterings <- function(clustering1, clustering2,
   # n is number of data points
   n <- nrow(clusterTrees[[1]]$treeMatrix)
   # combine clusterTrees
-  clustering<-clusterTrees[[1]]$treeMatrix
+  clustering <- clusterTrees[[1]]$treeMatrix
   for(i in 2:length(clusterTrees))
   {
     clustering<-cbind(clustering,clusterTrees[[i]]$treeMatrix)  
@@ -209,7 +209,7 @@ combineClusterings <- function(clustering1, clustering2,
   
   # Final cluster tree will be a collection of layers
   verticesSets <- array(0,dim = c(m,n))
-  layerSet <- array(0, dim = c(m,1))
+  layerHeight <- array(0, dim = c(m,1))
   
   
   shrink <- array(0, dim = c(m,1))
@@ -253,7 +253,7 @@ combineClusterings <- function(clustering1, clustering2,
   
   for (i in m:1) {
     if (i==m) {
-      layerSet[i] <- 1
+      layerHeight[i] <- 1
     }
     
     for (j in 1:2) {
@@ -261,22 +261,22 @@ combineClusterings <- function(clustering1, clustering2,
       if (getValue > 0) { # have a branch
         if(shrink[getValue])
         {
-          layerSet[getValue] <- layerSet[i]
+          layerHeight[getValue] <- layerHeight[i]
         }
         else
         {
-          layerSet[getValue] <- layerSet[i] + 1
+          layerHeight[getValue] <- layerHeight[i] + 1
         }
       }
     }
   }
   
   
-  branchComponentFamily <- array(0, dim=c(n,max(layerSet)))
-  for (i in 1:max(layerSet)) {
+  branchComponentFamily <- array(0, dim=c(n,max(layerHeight)))
+  for (i in 1:max(layerHeight)) {
     clusterId <- 1
     for (j in 1:m) {
-      if (layerSet[j] == i && shrink[j]==FALSE) {  # effects the telescoping
+      if (layerHeight[j] == i && shrink[j]==FALSE) {  # effects the telescoping
         for(k in 1:n)
         {
           if(verticesSets[j,k]>0)
@@ -288,7 +288,7 @@ combineClusterings <- function(clustering1, clustering2,
       }
     }
   }
-  tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerSet)],labels = labels)
+  tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerHeight)],labels = labels)
   tree
 }
 
@@ -307,14 +307,14 @@ combineClusterings <- function(clustering1, clustering2,
 #' clustering3 <- dbscan::dbscan(data,eps=.78)
 #' res <- combineClusterings(clustering1,clustering2,clustering3) 
 #' # obtain the order for reordering cluster tree
-#' order <- reOrderClusterTreeMatrix(res$treeMatrix)
+#' order <- reorderClusterTreeMatrix(res$treeMatrix)
 #' # After reordering, data points with same cluster id are always next
 #' # to each other
 #' reordered_treeMatrix <- res$treeMatrix[order,]
 #' # check reordered_treeMatrix
 #' reordered_treeMatrix
 #' @export
-reOrderClusterTreeMatrix <- function(treeMatrix,order=NULL)
+reorderClusterTreeMatrix <- function(treeMatrix,order=NULL)
 {
   # reordering is implemented recursively
   # for each function call, the first column of treeMatrix is reordered correctly
@@ -347,7 +347,7 @@ reOrderClusterTreeMatrix <- function(treeMatrix,order=NULL)
       recursiveOrder <- order[IndexesWithSameIds]
       # call this function recursively to get order for next level
       # add recursive answers into the result
-      res <- c(res,reOrderClusterTreeMatrix(recursiveTreeMatrix,recursiveOrder))
+      res <- c(res,reorderClusterTreeMatrix(recursiveTreeMatrix,recursiveOrder))
     }
     # add indexes that corresponds to NAs in the end
     res <- c(res,order[is.na(treeMatrix[,1])])

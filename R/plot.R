@@ -74,7 +74,7 @@ clusterTreeToClusterTreePlotInfo <- function(x, padding = .2){
   labels_index <- c(1:nrow(x$treeMatrix))
   labels_index <- labels_index[order]
   # call a helper function to help organize plot info for clusterTree in recursive fashion
-  res <- clusterTreeToClusterTreePlotInfoRecursiveHelper(treeMatrix = orderedTreeMatrix, leftBorderPlotRegion = 0, bottomBorderPlotRegion = 0, 
+  res <- recursivePlotInfo(treeMatrix = orderedTreeMatrix, leftBorderPlotRegion = 0, bottomBorderPlotRegion = 0, 
     rightBorderPlotRegion = 1, topBorderPlotRegion = 1, labels_index = labels_index, padding = padding)
   # class(res) <- c("clusterTreePlotInfo", class(res))
   res
@@ -91,9 +91,9 @@ clusterTreeToClusterTreePlotInfo <- function(x, padding = .2){
 #' @param topBorderPlotRegion coordinate of the plot region's top border on (0,1)*(0,1) canvas
 #' @param labels_index index of labels to paste in each appropriate position
 #' @param padding padding of rectangle in rectangle plot region
-clusterTreeToClusterTreePlotInfoRecursiveHelper <- function(treeMatrix, leftBorderPlotRegion, 
-                                                            bottomBorderPlotRegion, rightBorderPlotRegion,
-                                                            topBorderPlotRegion, labels_index, padding){
+recursivePlotInfo <- function(treeMatrix, leftBorderPlotRegion, 
+                              bottomBorderPlotRegion, rightBorderPlotRegion,
+                              topBorderPlotRegion, labels_index, padding){
   # target of this function is to generate plot info of treeMatrix recursively
   # plot info includes treeMatrix, rectangles, labels, lines, is.runts, subtrees, numBranches
   # there is a correspondance relation between plot info, which is:
@@ -221,12 +221,13 @@ clusterTreeToClusterTreePlotInfoRecursiveHelper <- function(treeMatrix, leftBord
         # add labelsInfo to labels
         subBranchLabelGroups[[length(subBranchLabelGroups)+1]] <- list(labels = labelsInfo)
         # create subtree from recursive call
-        subtree <- clusterTreeToClusterTreePlotInfoRecursiveHelper(treeMatrix = as.matrix(treeMatrix[clusterStartRowIndex:(clusterEndRowIndex-1),2:ncol(treeMatrix)]),
-                                            leftBorderPlotRegion = leftBorderRectangleRegion, 
-                                            bottomBorderPlotRegion = topBorderRectangleRegion, 
-                                            rightBorderPlotRegion = rightBorderRectangleRegion, 
-                                            topBorderPlotRegion = topBorderPlotRegion, 
-                                            labels_index = labels_index[clusterStartRowIndex:(clusterEndRowIndex-1)], padding = padding)
+        subtree <- recursivePlotInfo(
+          treeMatrix = as.matrix(treeMatrix[clusterStartRowIndex:(clusterEndRowIndex-1),2:ncol(treeMatrix)]),
+          leftBorderPlotRegion = leftBorderRectangleRegion, 
+          bottomBorderPlotRegion = topBorderRectangleRegion, 
+          rightBorderPlotRegion = rightBorderRectangleRegion, 
+          topBorderPlotRegion = topBorderPlotRegion, 
+          labels_index = labels_index[clusterStartRowIndex:(clusterEndRowIndex-1)], padding = padding)
         # add subtree into subtrees list
         subtrees[[length(subtrees)+1]] <- subtree
         subtreeRectangles <- subtree$plotLayerInfo$rectangles
