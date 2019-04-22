@@ -68,7 +68,7 @@ mergeToMatrix <- function( merge ) {
   # record which layer each data point belongs to 
   layerSet <- array(0,dim=c(m,1))
   
-  # get the coorresponding vertices set for each row in merge
+  # get the corresponding vertices set for each row in merge
   for (i in 1:m) {
     location <- 1
     for (j in 1:2) {
@@ -199,36 +199,37 @@ combineClusterings <- function(clustering1, clustering2,
                                   (clustering[j,]==clustering[k,])))
     }
   }
-  distance <- stats::as.dist(clusteringsum)
-  singlelinkage <- stats::hclust(-distance, method = "single")
+  distance <- -(stats::as.dist(clusteringsum))  # clustering sum is a set of similarities
+  singlelinkage <- stats::hclust(distance, method = "single")
   merge <- singlelinkage$merge
   height <- singlelinkage$height
   
   m <- dim(merge)[1]
   n <- m + 1
   
+  # Final cluster tree will be a collection of layers
   verticesSets <- array(0,dim = c(m,n))
   layerSet <- array(0, dim = c(m,1))
+  
   
   shrink <- array(0, dim = c(m,1))
   for(i in m:1)
   {
-    if(merge[i,1]>0 && height[i]==height[merge[i,1]])
+    if(merge[i,1]>0 & height[i]==height[merge[i,1]])
+      # Left branch: Split distance is identical ... more than binary split 
     {
       shrink[merge[i,1]]=TRUE
     }
-    if(merge[i,2]>0 && height[i]==height[merge[i,2]])
+    if(merge[i,2]>0 & height[i]==height[merge[i,2]])
+      # Right branch: Split distance is identical ... more than binary split 
     {
       shrink[merge[i,2]]=TRUE
     }
-    if(merge[i,1]<0 && merge[i,2]>0)
+    if(merge[i,1]<0 & merge[i,2]>0)
+      # Trivial pruning
     {
       shrink[merge[i,2]]=TRUE
     }
-    #if(merge[i,1]>0 && merge[i,2]<0)
-    #{
-    #  shrink[merge[i,1]]=TRUE
-    #}
   }
   
   for (i in 1:m) {
@@ -251,16 +252,13 @@ combineClusterings <- function(clustering1, clustering2,
   }
   
   for (i in m:1) {
-    index <- i
     if (i==m) {
       layerSet[i] <- 1
     }
     
     for (j in 1:2) {
       getValue <- merge[i,j]
-      if (getValue < 0) {
-      }
-      if (getValue > 0) {
+      if (getValue > 0) { # have a branch
         if(shrink[getValue])
         {
           layerSet[getValue] <- layerSet[i]
@@ -278,7 +276,7 @@ combineClusterings <- function(clustering1, clustering2,
   for (i in 1:max(layerSet)) {
     clusterId <- 1
     for (j in 1:m) {
-      if (layerSet[j] == i && shrink[j]==FALSE) {
+      if (layerSet[j] == i && shrink[j]==FALSE) {  # effects the telescoping
         for(k in 1:n)
         {
           if(verticesSets[j,k]>0)
@@ -345,7 +343,7 @@ reOrderClusterTreeMatrix <- function(treeMatrix,order=NULL)
       # find Indexes that belong to same cluster
       IndexesWithSameIds <- (treeMatrix[,1]==id) & (!is.na(treeMatrix[,1]))
       # form treeMatrix and order for recursive calls
-      recursiveTreeMatrix <- as.matrix(treeMatrix[IndexesWithSameIds,][,2:dim(treeMatrix)[2]])
+      recursiveTreeMatrix <- as.matrix(treeMatrix[IndexesWithSameIds,-1])
       recursiveOrder <- order[IndexesWithSameIds]
       # call this function recursively to get order for next level
       # add recursive answers into the result
