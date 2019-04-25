@@ -174,37 +174,44 @@ combineClusterings <- function(clustering1, clustering2,
     # map clusterings to cluster trees
     clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
   }
+  if(is.null(weights)){
+    # initialize weights to all one vector if it is null
+    weights <- rep(1,length(clusterTrees))
+  }
+  if(length(weights)!=length(clusterTrees)){
+    stop('length of weights and length of clusterings do not match!')
+  }
   # n is number of data points
   n <- nrow(clusterTrees[[1]]$treeMatrix)
+  extendedWeights <- c()
   # combine clusterTrees
   clustering <- clusterTrees[[1]]$treeMatrix
+  extendedWeights <- c(extendedWeights,rep(weights[1],ncol(clusterTrees[[1]]$treeMatrix)))
   for(i in 2:length(clusterTrees))
   {
     # add each treeMatrix into final matrix
-    clustering<-cbind(clustering,clusterTrees[[i]]$treeMatrix)  
+    clustering<-cbind(clustering,clusterTrees[[i]]$treeMatrix)
+    # extend weights because hierarchical clustering's treeMatrix may have more than one column/layer
+    # we need to assign weights to each layer of hierarchical clustering
+    extendedWeights <- c(extendedWeights,ncol(clusterTrees[[i]]$treeMatrix))
   }
+  # change NA to zeros
   clustering[is.na(clustering)] <- 0
   if(sum(clustering!=0) == 0)
     stop('at least one entry of clustering result must be nonzero')
-  if(is.null(weights)){
-    # note length of weights is not the length of multiple clusterings
-    # for hierarchical clustering, length of weights should be longer than 1
-    weights <- rep(1,ncol(clustering))
-  }
-  if(length(weights)!=ncol(clustering)){
-    stop('length of weights and length of clusterings do not match!')
-  }
   clusteringsum <- array(0,dim = c(n,n))
   for(j in 2:n)
   {
     for(k in 1:(j-1))
     {
-      clusteringsum[j,k] <- sum((weights)*((clustering[j,]!=0)&
+      # use extendedWeights to dot product 
+      clusteringsum[j,k] <- sum((extendedWeights)*((clustering[j,]!=0)&
                                   (clustering[k,]!=0)&
                                   (clustering[j,]==clustering[k,])))
     }
   }
   distance <- -(stats::as.dist(clusteringsum))  # clustering sum is a set of similarities
+  # apply single linkage on negative similarities
   singlelinkage <- stats::hclust(distance, method = "single")
   merge <- singlelinkage$merge
   height <- singlelinkage$height
@@ -217,26 +224,34 @@ combineClusterings <- function(clustering1, clustering2,
   for (i in 1:m) {
     currentNumber <- 0
     if(merge[i,1]<0){
+      # less than zero means size of cluster is one
       currentNumber <- currentNumber + 1
     }
     else{
+      # greater than zero means size of cluster can be retrieved recursively
       currentNumber <- currentNumber + numberOfPointsInMerge[merge[i,1]]
     }
     
     if(merge[i,2]<0){
+      # less than zero means size of cluster is one
       currentNumber <- currentNumber + 1
     }
     else{
+      # greater than zero means size of cluster can be retrieved recursively
       currentNumber <- currentNumber + numberOfPointsInMerge[merge[i,2]]
     }
+    # assign number of points for each row in merge
     numberOfPointsInMerge[i] <- currentNumber
   }
   
   # Final cluster tree will be a collection of layers
+  # verticeSets record all vertices ID for each row in merge
   verticesSets <- array(0,dim = c(m,n))
+  # layerHeight record layer number for each row in merge
   layerHeight <- array(0, dim = c(m,1))
   
-  
+  # decide whether to shrink for each row in merge
+  # if shrink is true, then we do not show 
   shrink <- array(0, dim = c(m,1))
   for(i in m:1)
   {
@@ -253,26 +268,38 @@ combineClusterings <- function(clustering1, clustering2,
     if(merge[i,1]<0 && merge[i,2]>0)
       # Trivial pruning
     {
+      # if merge[i,1] is trivial components, merge[i,2] is unnecessary
       shrink[merge[i,2]]=TRUE
     }
-    if(merge[i,1]>0){
-      if(numberOfPointsInMerge[merge[i,1]]<=pruneNumber){
+    if(merge[i,1]>0)
+    {
+      if(numberOfPointsInMerge[merge[i,1]]<=pruneNumber)
+      # if number of points is less than pruneNumber 
+      {
+        # shrink this row in merge
         shrink[merge[i,1]]=TRUE
         if(merge[i,2]>0){
+          # shrink this row in merge ... telescopic contraction
           shrink[merge[i,2]]=TRUE
         }
       }
     }
-    if(merge[i,2]>0){
-      if(numberOfPointsInMerge[merge[i,2]]<=pruneNumber){
+    if(merge[i,2]>0)
+    {
+      if(numberOfPointsInMerge[merge[i,2]]<=pruneNumber)
+      # if number of points is less than pruneNumber
+      {
         shrink[merge[i,2]]=TRUE
         if(merge[i,1]>0){
+          # shrink this row in merge ... telescopic contraction
           shrink[merge[i,1]]=TRUE
         }
       }
     }
   }
   
+  # construct verticeSets for each row
+  # note verticeSets represent vertices correspond to each row in merge
   for (i in 1:m) {
     location <- 1
     for (j in 1:2) {
@@ -292,6 +319,7 @@ combineClusterings <- function(clustering1, clustering2,
     }
   }
   
+  # record layer height for each row in merge
   for (i in m:1) {
     if (i==m) {
       layerHeight[i] <- 1
@@ -312,7 +340,8 @@ combineClusterings <- function(clustering1, clustering2,
     }
   }
   
-  
+  # branchComponentFamily is actually a treeMatrix
+  # put verticeSets in branchComponentFamily if shrink if false for each row
   branchComponentFamily <- array(0, dim=c(n,max(layerHeight)))
   for (i in 1:max(layerHeight)) {
     clusterId <- 1
@@ -329,7 +358,10 @@ combineClusterings <- function(clustering1, clustering2,
       }
     }
   }
-  tree <- matrixToClusterTree(branchComponentFamily[,2:max(layerHeight)],labels = labels)
+  if(ncol(branchComponentFamily)>1){
+    branchComponentFamily <- branchComponentFamily[,-1]
+  }
+  tree <- matrixToClusterTree(branchComponentFamily,labels = labels)
   tree
 }
 
