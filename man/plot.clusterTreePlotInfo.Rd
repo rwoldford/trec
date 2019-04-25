@@ -7,8 +7,7 @@
 \method{plot}{clusterTreePlotInfo}(x, y = NULL, labels = NULL,
   axes = TRUE, frame.plot = FALSE, ann = TRUE,
   main = "Cluster Tree Density Plot", sub = NULL, xlab = NULL,
-  ylab = "Height", col = NULL, labels.cex = 1, labels.col = NULL,
-  ...)
+  ylab = "Height", col = NULL, labels.cex = 1, labels.col = NULL, ...)
 }
 \arguments{
 \item{x}{a clusterTree object}

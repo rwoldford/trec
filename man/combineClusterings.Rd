@@ -5,7 +5,8 @@
 \title{An ensemble method for combining multiple clustering outcomes based
 on monotonic graph families of Zhou and Oldford}
 \usage{
-combineClusterings(clustering1, clustering2, ..., labels = NULL)
+combineClusterings(clustering1, clustering2, ..., labels = NULL,
+  weights = NULL, pruneNumber = 1)
 }
 \arguments{
 \item{clustering1}{result of some clustering, for example output from hclust(). A clustering
@@ -17,6 +18,8 @@ of levels in the clustering hierarchy.}
 \item{...}{results of other clustering methods, to be combined with the first two.}
 
 \item{labels}{labels of data points in clustering results}
+
+\item{pruneNumber}{set number for pruning trivial components}
 }
 \value{
 a clusterTree object, which is the final clustering result from combining
@@ -33,7 +36,7 @@ data <- rbind(matrix(rnorm(100, mean = 10, sd = 2), nrow = 50),
               )
 clustering1 <- stats::hclust(dist(data),method='single')
 clustering2 <- kmeans(data,centers=3)
-clustering3 <- dbscan::dbscan(data,eps=.1)
+clustering3 <- dbscan::dbscan(data,eps=.8)
 res <- combineClusterings(clustering1,clustering2,clustering3)
 
 }

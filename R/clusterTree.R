@@ -146,6 +146,7 @@ mergeToMatrix <- function( merge ) {
 #' @param clustering2 result of a second clustering, to be combined with the first.
 #' @param ... results of other clustering methods, to be combined with the first two.
 #' @param labels labels of data points in clustering results
+#' @param pruneNumber set number for pruning trivial components
 #' @return a clusterTree object, which is the final clustering result from combining
 #' all input clustering results
 #' @examples
@@ -155,12 +156,12 @@ mergeToMatrix <- function( merge ) {
 #'               )
 #' clustering1 <- stats::hclust(dist(data),method='single')
 #' clustering2 <- kmeans(data,centers=3)
-#' clustering3 <- dbscan::dbscan(data,eps=.1)
+#' clustering3 <- dbscan::dbscan(data,eps=.8)
 #' res <- combineClusterings(clustering1,clustering2,clustering3)
 #' 
 #' @export
 combineClusterings <- function(clustering1, clustering2, 
-                               ..., labels = NULL, weights = NULL) {
+                               ..., labels = NULL, weights = NULL, pruneNumber = 1) {
   if (missing(clustering1)) stop("Must provide output of clustering for first argument")
   if (missing(clustering2)){
     if (!methods::is(clustering1, "clusterings")) {
@@ -170,13 +171,8 @@ combineClusterings <- function(clustering1, clustering2,
       clusterTrees <- Map(getClusterTree, clustering1)
     }
   } else {
+    # map clusterings to cluster trees
     clusterTrees <- Map(getClusterTree, list(clustering1, clustering2, ...))
-  }
-  if(is.null(weights)){
-    weights <- rep(1,length(list(clustering1,clustering2, ...)))
-  }
-  if(length(weights)!=length(list(clustering1,clustering2, ...))){
-    stop('length of weights and length of clusterings do not match!')
   }
   # n is number of data points
   n <- nrow(clusterTrees[[1]]$treeMatrix)
@@ -184,11 +180,20 @@ combineClusterings <- function(clustering1, clustering2,
   clustering <- clusterTrees[[1]]$treeMatrix
   for(i in 2:length(clusterTrees))
   {
+    # add each treeMatrix into final matrix
     clustering<-cbind(clustering,clusterTrees[[i]]$treeMatrix)  
   }
   clustering[is.na(clustering)] <- 0
   if(sum(clustering!=0) == 0)
     stop('at least one entry of clustering result must be nonzero')
+  if(is.null(weights)){
+    # note length of weights is not the length of multiple clusterings
+    # for hierarchical clustering, length of weights should be longer than 1
+    weights <- rep(1,ncol(clustering))
+  }
+  if(length(weights)!=ncol(clustering)){
+    stop('length of weights and length of clusterings do not match!')
+  }
   clusteringsum <- array(0,dim = c(n,n))
   for(j in 2:n)
   {
@@ -207,6 +212,26 @@ combineClusterings <- function(clustering1, clustering2,
   m <- dim(merge)[1]
   n <- m + 1
   
+  #count number of data points for each row in merge
+  numberOfPointsInMerge <- rep(0,m)
+  for (i in 1:m) {
+    currentNumber <- 0
+    if(merge[i,1]<0){
+      currentNumber <- currentNumber + 1
+    }
+    else{
+      currentNumber <- currentNumber + numberOfPointsInMerge[merge[i,1]]
+    }
+    
+    if(merge[i,2]<0){
+      currentNumber <- currentNumber + 1
+    }
+    else{
+      currentNumber <- currentNumber + numberOfPointsInMerge[merge[i,2]]
+    }
+    numberOfPointsInMerge[i] <- currentNumber
+  }
+  
   # Final cluster tree will be a collection of layers
   verticesSets <- array(0,dim = c(m,n))
   layerHeight <- array(0, dim = c(m,1))
@@ -215,20 +240,36 @@ combineClusterings <- function(clustering1, clustering2,
   shrink <- array(0, dim = c(m,1))
   for(i in m:1)
   {
-    if(merge[i,1]>0 & height[i]==height[merge[i,1]])
+    if(merge[i,1]>0 && height[i]==height[merge[i,1]])
       # Left branch: Split distance is identical ... more than binary split 
     {
       shrink[merge[i,1]]=TRUE
     }
-    if(merge[i,2]>0 & height[i]==height[merge[i,2]])
+    if(merge[i,2]>0 && height[i]==height[merge[i,2]])
       # Right branch: Split distance is identical ... more than binary split 
     {
       shrink[merge[i,2]]=TRUE
     }
-    if(merge[i,1]<0 & merge[i,2]>0)
+    if(merge[i,1]<0 && merge[i,2]>0)
       # Trivial pruning
     {
       shrink[merge[i,2]]=TRUE
+    }
+    if(merge[i,1]>0){
+      if(numberOfPointsInMerge[merge[i,1]]<=pruneNumber){
+        shrink[merge[i,1]]=TRUE
+        if(merge[i,2]>0){
+          shrink[merge[i,2]]=TRUE
+        }
+      }
+    }
+    if(merge[i,2]>0){
+      if(numberOfPointsInMerge[merge[i,2]]<=pruneNumber){
+        shrink[merge[i,2]]=TRUE
+        if(merge[i,1]>0){
+          shrink[merge[i,1]]=TRUE
+        }
+      }
     }
   }
   
@@ -314,7 +355,7 @@ combineClusterings <- function(clustering1, clustering2,
 #' # check reordered_treeMatrix
 #' reordered_treeMatrix
 #' @export
-reorderClusterTreeMatrix <- function(treeMatrix,order=NULL)
+reOrderClusterTreeMatrix <- function(treeMatrix,order=NULL)
 {
   # reordering is implemented recursively
   # for each function call, the first column of treeMatrix is reordered correctly
@@ -347,7 +388,7 @@ reorderClusterTreeMatrix <- function(treeMatrix,order=NULL)
       recursiveOrder <- order[IndexesWithSameIds]
       # call this function recursively to get order for next level
       # add recursive answers into the result
-      res <- c(res,reorderClusterTreeMatrix(recursiveTreeMatrix,recursiveOrder))
+      res <- c(res,reOrderClusterTreeMatrix(recursiveTreeMatrix,recursiveOrder))
     }
     # add indexes that corresponds to NAs in the end
     res <- c(res,order[is.na(treeMatrix[,1])])

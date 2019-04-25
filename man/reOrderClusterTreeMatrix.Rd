@@ -29,7 +29,7 @@ clustering2 <- kmeans(data,centers=3)
 clustering3 <- dbscan::dbscan(data,eps=.78)
 res <- combineClusterings(clustering1,clustering2,clustering3) 
 # obtain the order for reordering cluster tree
-order <- reOrderClusterTreeMatrix(res$treeMatrix)
+order <- reorderClusterTreeMatrix(res$treeMatrix)
 # After reordering, data points with same cluster id are always next
 # to each other
 reordered_treeMatrix <- res$treeMatrix[order,]
