@@ -4,8 +4,8 @@
 \alias{plotClusterTreePlotInfoRecursiveHelper}
 \title{helper function to plot a clusterTreePlotInfo object}
 \usage{
-plotClusterTreePlotInfoRecursiveHelper(x, labels.plot, labels, col,
-  labels.cex, labels.col, ...)
+plotClusterTreePlotInfoRecursiveHelper(x, labels.plot, labels, col, labels.cex,
+  labels.col, ...)
 }
 \arguments{
 \item{x}{a clusterTreePlotInfo object}
